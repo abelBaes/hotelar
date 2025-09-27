@@ -105,6 +105,27 @@ public class ReservationTest {
         );
     }
 
+    static Stream<Arguments> pastDatesProvider() {
+        return Stream.of(
+                Arguments.of(
+                        LocalDateTime.now().minusDays(1),
+                        LocalDateTime.now().plusDays(1)
+                ),
+                Arguments.of(
+                        LocalDateTime.now().minusHours(1),
+                        LocalDateTime.now().plusHours(5)
+                ),
+                Arguments.of(
+                        LocalDateTime.now().minusMinutes(1),
+                        LocalDateTime.now().plusDays(2)
+                ),
+                Arguments.of(
+                        LocalDateTime.now().minusDays(2),
+                        LocalDateTime.now().minusDays(1)
+                )
+        );
+    }
+
 
 
     @ParameterizedTest
@@ -153,15 +174,13 @@ public class ReservationTest {
                 .hasMessageContaining("Check-in date must be before check-out date");
     }
 
-    @Test
+    @ParameterizedTest(name = "[{index}] Past reservation invalid → checkIn={0}, checkOut={1}")
+    @MethodSource(value = "pastDatesProvider")
     @Tag("UnitTest")
     @Tag("TDD")
-    void shouldNotAllowReservationWithPastDates() {
+    void shouldNotAllowReservationWithPastDates(LocalDateTime pastCheckIn, LocalDateTime pastCheckOut) {
         Room room = new Room("301", Status.AVAILABLE, 180.0);
         Guest guest = new Guest("Clara", 27);
-
-        LocalDateTime pastCheckIn = LocalDateTime.of(2020, 1, 10, 14, 0);
-        LocalDateTime pastCheckOut = LocalDateTime.of(2020, 1, 12, 11, 0);
 
         assertThatThrownBy(() ->
                 sut.createReservation(room, guest, pastCheckIn, pastCheckOut)
