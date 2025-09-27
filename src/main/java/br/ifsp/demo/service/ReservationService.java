@@ -13,6 +13,10 @@ public class ReservationService {
 
     public Reservation createReservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
 
+        if (guest.getAge() < 18){
+            throw new IllegalArgumentException("Guest must be at least 18 years old to make a reservation");
+        }
+
         if(room == null){
             throw new IllegalArgumentException("Room does not exist");
         }
