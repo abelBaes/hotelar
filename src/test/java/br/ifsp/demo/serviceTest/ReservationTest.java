@@ -226,8 +226,7 @@ public class ReservationTest {
     @CsvSource({
             "17, false",
             "18, true",
-            "19, true"
-    })
+            "19, true"})
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldValidateGuestAgeForReservation(int age, boolean shouldSucceed) {
@@ -247,6 +246,22 @@ public class ReservationTest {
                     .hasMessageContaining("at least 18 years old");
         }
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotAllowReservationWithoutGuest() {
+        Room room = new Room("301", Status.AVAILABLE, 200.0);
+
+        assertThatThrownBy(() ->
+                sut.createReservation(room, null,
+                        LocalDateTime.of(2025, 12, 1, 14, 0),
+                        LocalDateTime.of(2025, 12, 5, 11, 0))
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Guest must not be null");
+    }
+
 
 
 
