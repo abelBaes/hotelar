@@ -13,6 +13,13 @@ public class ReservationService {
 
     public Reservation createReservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
 
+
+        if (guest.getCpf() == null || guest.getCpf().isBlank()
+                || guest.getName() == null || guest.getName().isBlank()
+                || guest.getAge() == null) {
+            throw new IllegalArgumentException("Guest must provide valid CPF, name and age");
+        }
+
         if(guest == null) {
             throw new IllegalArgumentException("Guest must not be null");
         }
