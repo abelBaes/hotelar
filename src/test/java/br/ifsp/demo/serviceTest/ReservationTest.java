@@ -2,6 +2,7 @@ package br.ifsp.demo.serviceTest;
 
 import br.ifsp.demo.domain.*;
 import br.ifsp.demo.service.ReservationService;
+import net.bytebuddy.asm.MemberSubstitution;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -83,6 +84,28 @@ public class ReservationTest {
         );
     }
 
+    static Stream<Arguments> invalidDatesProvider() {
+        return Stream.of(
+                Arguments.of(
+                        LocalDateTime.of(2025, 10, 10, 14, 0),
+                        LocalDateTime.of(2025, 10, 10, 14, 0)
+                ),
+                Arguments.of(
+                        LocalDateTime.of(2025, 10, 12, 14, 0),
+                        LocalDateTime.of(2025, 10, 11, 11, 0)
+                ),
+                Arguments.of(
+                        LocalDateTime.of(2025, 10, 10, 14, 0),
+                        LocalDateTime.of(2025, 10, 10, 13, 59)
+                ),
+                Arguments.of(
+                        LocalDateTime.of(2025, 10, 10, 23, 59),
+                        LocalDateTime.of(2025, 10, 10, 0, 0)
+                )
+        );
+    }
+
+
 
     @ParameterizedTest
     @MethodSource("reservationProvider")
@@ -100,6 +123,7 @@ public class ReservationTest {
 
     @ParameterizedTest(name = "[{index}] Overlap: {0} - {1} with {2} - {3}")
     @Tag("UnitTest")
+    @Tag("TDD")
     @MethodSource(value = "reservationConflictProvider")
     void shouldNotAllowOverlappingReservationsForSameRoom(LocalDateTime firstCheckIn, LocalDateTime firstCheckOut, LocalDateTime secondCheckInOverLaped, LocalDateTime secondCheckOutOverLaped) {
         Room room102 = new Room("102", Status.AVAILABLE, 200.0);
@@ -114,16 +138,16 @@ public class ReservationTest {
                 .hasMessageContaining("not available");
     }
 
-    @Test
-    void shouldNotAllowReservationWhenCheckInIsAfterOrEqualToCheckOut() {
-        Room room105 = new Room("105", Status.AVAILABLE, 180.0);
-        Guest guest = new Guest("Lucas", 27);
-
-        LocalDateTime invalidCheckIn = LocalDateTime.of(2025, 12, 20, 14, 0);
-        LocalDateTime invalidCheckOut = LocalDateTime.of(2025, 12, 19, 11, 0);
+    @ParameterizedTest(name = "[{index}] checkIn={0}, checkOut={1} - INVALID")
+    @MethodSource("invalidDatesProvider")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotAllowReservationWhenCheckInIsAfterOrEqualToCheckOut(LocalDateTime invalidCheckIn, LocalDateTime invalidCheckOut) {
+        Room room = new Room("201", Status.AVAILABLE, 150.0);
+        Guest guest = new Guest("João", 25);
 
         assertThatThrownBy(() ->
-                sut.createReservation(room105, guest, invalidCheckIn, invalidCheckOut)
+                sut.createReservation(room, guest, invalidCheckIn, invalidCheckOut)
         )
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Check-in date must be before check-out date");
