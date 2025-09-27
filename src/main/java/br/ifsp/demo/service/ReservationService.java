@@ -17,6 +17,10 @@ public class ReservationService {
             throw new IllegalArgumentException("Room does not exist");
         }
 
+        if (room.getStatus() == Status.UNDER_MAINTENANCE) {
+            throw new IllegalStateException("Room is under maintenance");
+        }
+
         if (checkIn.isAfter(checkOut) || checkIn.isEqual(checkOut)) {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
         }
