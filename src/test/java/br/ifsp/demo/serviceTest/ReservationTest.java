@@ -153,5 +153,22 @@ public class ReservationTest {
                 .hasMessageContaining("Check-in date must be before check-out date");
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotAllowReservationWithPastDates() {
+        Room room = new Room("301", Status.AVAILABLE, 180.0);
+        Guest guest = new Guest("Clara", 27);
+
+        LocalDateTime pastCheckIn = LocalDateTime.of(2020, 1, 10, 14, 0);
+        LocalDateTime pastCheckOut = LocalDateTime.of(2020, 1, 12, 11, 0);
+
+        assertThatThrownBy(() ->
+                sut.createReservation(room, guest, pastCheckIn, pastCheckOut)
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Reservation dates must be in the future");
+    }
+
 
 }
