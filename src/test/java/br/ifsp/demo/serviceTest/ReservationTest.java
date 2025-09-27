@@ -114,4 +114,20 @@ public class ReservationTest {
                 .hasMessageContaining("not available");
     }
 
+    @Test
+    void shouldNotAllowReservationWhenCheckInIsAfterOrEqualToCheckOut() {
+        Room room105 = new Room("105", Status.AVAILABLE, 180.0);
+        Guest guest = new Guest("Lucas", 27);
+
+        LocalDateTime invalidCheckIn = LocalDateTime.of(2025, 12, 20, 14, 0);
+        LocalDateTime invalidCheckOut = LocalDateTime.of(2025, 12, 19, 11, 0);
+
+        assertThatThrownBy(() ->
+                sut.createReservation(room105, guest, invalidCheckIn, invalidCheckOut)
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Check-in date must be before check-out date");
+    }
+
+
 }
