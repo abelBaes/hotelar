@@ -221,6 +221,25 @@ public class ReservationTest {
                 .hasMessageContaining("Room is under maintenance");
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotAllowReservationForMinorGuest() {
+        Room room = new Room("301", Status.AVAILABLE, 200.0);
+        Guest minor = new Guest("Lucas", 16);
+
+        assertThatThrownBy(() ->
+                sut.createReservation(
+                        room,
+                        minor,
+                        LocalDateTime.of(2025, 11, 10, 14, 0),
+                        LocalDateTime.of(2025, 11, 11, 11, 0)
+                )
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Guest must be at least 18 years old");
+    }
+
 
 
 }
