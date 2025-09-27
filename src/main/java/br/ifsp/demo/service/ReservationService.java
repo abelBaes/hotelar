@@ -13,6 +13,10 @@ public class ReservationService {
 
     public Reservation createReservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
 
+        if(room == null){
+            throw new IllegalArgumentException("Room does not exist");
+        }
+
         if (checkIn.isAfter(checkOut) || checkIn.isEqual(checkOut)) {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
         }
