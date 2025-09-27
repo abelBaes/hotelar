@@ -216,7 +216,7 @@ public class ReservationTest {
         assertThatThrownBy(() ->
                 sut.createReservation(null, guest, checkIn, checkOut)
         )
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Room does not exist");
     }
 
@@ -273,7 +273,7 @@ public class ReservationTest {
                         LocalDateTime.of(2025, 12, 1, 14, 0),
                         LocalDateTime.of(2025, 12, 5, 11, 0))
         )
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Guest must not be null");
     }
 
