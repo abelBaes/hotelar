@@ -205,5 +205,22 @@ public class ReservationTest {
     }
 
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotAllowReservationForRoomUnderMaintenance() {
+        Room roomInMaintenance = new Room("401", Status.UNDER_MAINTENANCE, 300.0);
+        Guest guest = new Guest("Julia", 32);
+        LocalDateTime checkIn = LocalDateTime.of(2025, 12, 1, 14, 0);
+        LocalDateTime checkOut = LocalDateTime.of(2025, 12, 3, 11, 0);
+
+        assertThatThrownBy(() ->
+                sut.createReservation(roomInMaintenance, guest, checkIn, checkOut)
+        )
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Room is under maintenance");
+    }
+
+
 
 }
