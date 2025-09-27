@@ -1,6 +1,7 @@
 package br.ifsp.demo.service;
 import br.ifsp.demo.domain.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ public class ReservationService {
 
     private final List<Reservation> reservations = new ArrayList<>();
 
-    public Reservation createReservation(Room room, Guest guest, LocalDate checkIn, LocalDate checkOut) {
+    public Reservation createReservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
         for (Reservation existing : reservations) {
             if (existing.getRoom().getId().equals(room.getId())) {
                 boolean overlap = checkIn.isBefore(existing.getCheckOut())

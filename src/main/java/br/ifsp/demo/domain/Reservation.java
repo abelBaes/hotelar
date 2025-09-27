@@ -1,15 +1,16 @@
 package br.ifsp.demo.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Reservation {
 
     private final Room room;
     private final Guest guest;
-    private final LocalDate checkIn;
-    private final LocalDate checkOut;
+    private final LocalDateTime checkIn;
+    private final LocalDateTime checkOut;
 
-    public Reservation(Room room, Guest guest, LocalDate checkIn, LocalDate checkOut) {
+    public Reservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
         this.room = room;
         this.guest = guest;
         this.checkIn = checkIn;
@@ -24,11 +25,11 @@ public class Reservation {
         return guest;
     }
 
-    public LocalDate getCheckIn() {
+    public LocalDateTime getCheckIn() {
         return checkIn;
     }
 
-    public LocalDate getCheckOut() {
+    public LocalDateTime getCheckOut() {
         return checkOut;
     }
 }

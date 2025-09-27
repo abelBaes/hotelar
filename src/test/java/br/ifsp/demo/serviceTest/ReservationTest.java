@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,23 +30,65 @@ public class ReservationTest {
                 Arguments.of(
                         new Room("101", Status.AVAILABLE, 250.0),
                         new Guest("Maria", 30),
-                        LocalDate.of(2025, 10, 6),
-                        LocalDate.of(2025, 10, 7)
+                        LocalDateTime.of(2025, 10, 6, 14, 0),
+                        LocalDateTime.of(2025, 10, 7, 11, 0)
                 ),
                 Arguments.of(
                         new Room("102", Status.AVAILABLE, 250.0),
                         new Guest("Pedro", 30),
-                        LocalDate.of(2025, 10, 15),
-                        LocalDate.of(2025, 10, 16)
+                        LocalDateTime.of(2025, 10, 15, 14, 0),
+                        LocalDateTime.of(2025, 10, 16, 11, 0)
+                ), Arguments.of(
+                        new Room("102", Status.AVAILABLE, 250.0),
+                        new Guest("Pedro", 30),
+                        LocalDateTime.of(2025, 10, 16, 12, 0),
+                        LocalDateTime.of(2025, 10, 18, 11, 0)
                 )
         );
     }
+
+
+    static Stream<Arguments> reservationConflictProvider() {
+        return Stream.of(
+                Arguments.of(
+                        LocalDateTime.of(2025, 11, 10, 14, 0),
+                        LocalDateTime.of(2025, 11, 15, 12, 0),
+                        LocalDateTime.of(2025, 11, 12, 10, 0),
+                        LocalDateTime.of(2025, 11, 14, 11, 0)
+                ),
+                Arguments.of(
+                        LocalDateTime.of(2025, 11, 10, 14, 0),
+                        LocalDateTime.of(2025, 11, 15, 12, 0),
+                        LocalDateTime.of(2025, 11, 9, 23, 59),
+                        LocalDateTime.of(2025, 11, 11, 9, 0)
+                ),
+                Arguments.of(
+                        LocalDateTime.of(2025, 11, 10, 14, 0),
+                        LocalDateTime.of(2025, 11, 15, 12, 0),
+                        LocalDateTime.of(2025, 11, 10, 14, 0),
+                        LocalDateTime.of(2025, 11, 16, 0, 0)
+                ),
+                Arguments.of(
+                        LocalDateTime.of(2025, 11, 10, 14, 0),
+                        LocalDateTime.of(2025, 11, 15, 12, 0),
+                        LocalDateTime.of(2025, 11, 11, 8, 0),
+                        LocalDateTime.of(2025, 11, 15, 12, 0)
+                ),
+                Arguments.of(
+                        LocalDateTime.of(2025, 11, 10, 14, 0),
+                        LocalDateTime.of(2025, 11, 15, 12, 0),
+                        LocalDateTime.of(2025, 11, 14, 0, 0),
+                        LocalDateTime.of(2025, 11, 18, 12, 0)
+                )
+        );
+    }
+
 
     @ParameterizedTest
     @MethodSource("reservationProvider")
     @Tag("UnitTest")
     @Tag("TDD")
-    void shouldCreateReservation(Room room, Guest guest, LocalDate checkIn, LocalDate checkOut) {
+    void shouldCreateReservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
         Reservation obtained = sut.createReservation(room, guest, checkIn, checkOut);
 
         assertThat(obtained).isNotNull();
@@ -55,22 +98,18 @@ public class ReservationTest {
         assertThat(obtained.getRoom().getStatus()).isEqualTo(Status.RESERVED);
     }
 
-    @Test
-    void shouldNotAllowOverlappingReservationsForSameRoom() {
+    @ParameterizedTest(name = "[{index}] Overlap: {0} - {1} with {2} - {3}")
+    @Tag("UnitTest")
+    @MethodSource(value = "reservationConflictProvider")
+    void shouldNotAllowOverlappingReservationsForSameRoom(LocalDateTime firstCheckIn, LocalDateTime firstCheckOut, LocalDateTime secondCheckInOverLaped, LocalDateTime secondCheckOutOverLaped) {
         Room room102 = new Room("102", Status.AVAILABLE, 200.0);
         Guest guest1 = new Guest("Marcos", 35);
         Guest guest2 = new Guest("Fernanda", 29);
 
-        LocalDate firstCheckIn = LocalDate.of(2025, 11, 10);
-        LocalDate firstCheckOut = LocalDate.of(2025, 11, 15);
-
         sut.createReservation(room102, guest1, firstCheckIn, firstCheckOut);
 
-        LocalDate overlappingCheckIn = LocalDate.of(2025, 11, 12);
-        LocalDate overlappingCheckOut = LocalDate.of(2025, 11, 14);
-
         assertThatThrownBy(() ->
-                sut.createReservation(room102, guest2, overlappingCheckIn, overlappingCheckOut))
+                sut.createReservation(room102, guest2, secondCheckInOverLaped, secondCheckOutOverLaped))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("not available");
     }
