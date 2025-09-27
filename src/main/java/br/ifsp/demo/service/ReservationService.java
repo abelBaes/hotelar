@@ -17,6 +17,10 @@ public class ReservationService {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
         }
 
+        if(checkIn.isBefore(LocalDateTime.now()) || checkOut.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Reservation dates must be in the future");
+        }
+
         for (Reservation existing : reservations) {
             if (existing.getRoom().getId().equals(room.getId())) {
                 boolean overlap = checkIn.isBefore(existing.getCheckOut())
