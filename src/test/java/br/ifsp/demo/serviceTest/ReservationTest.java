@@ -262,6 +262,25 @@ public class ReservationTest {
                 .hasMessageContaining("Guest must not be null");
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotAllowReservationWithInvalidGuestData() {
+        Room room = new Room("101", Status.AVAILABLE, 250.0);
+
+        Guest invalidGuest = new Guest("", null, "");
+
+        LocalDateTime checkIn = LocalDateTime.of(2025, 10, 6, 14, 0);
+        LocalDateTime checkOut = LocalDateTime.of(2025, 10, 8, 11, 0);
+
+        assertThatThrownBy(() ->
+                sut.createReservation(room, invalidGuest, checkIn, checkOut)
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Guest must provide valid CPF, name and age");
+    }
+
+
 
 
 
