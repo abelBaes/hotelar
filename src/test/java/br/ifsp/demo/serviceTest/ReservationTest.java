@@ -31,18 +31,18 @@ public class ReservationTest {
         return Stream.of(
                 Arguments.of(
                         new Room("101", Status.AVAILABLE, 250.0),
-                        new Guest("Maria", 30),
+                        new Guest("Maria", 30, "78609833038"),
                         LocalDateTime.of(2025, 10, 6, 14, 0),
                         LocalDateTime.of(2025, 10, 7, 11, 0)
                 ),
                 Arguments.of(
                         new Room("102", Status.AVAILABLE, 250.0),
-                        new Guest("Pedro", 30),
+                        new Guest("Pedro", 30, "75352394042"),
                         LocalDateTime.of(2025, 10, 15, 14, 0),
                         LocalDateTime.of(2025, 10, 16, 11, 0)
                 ), Arguments.of(
                         new Room("102", Status.AVAILABLE, 250.0),
-                        new Guest("Pedro", 30),
+                        new Guest("Pedro", 30, "00356457095"),
                         LocalDateTime.of(2025, 10, 16, 12, 0),
                         LocalDateTime.of(2025, 10, 18, 11, 0)
                 )
@@ -149,8 +149,8 @@ public class ReservationTest {
     @MethodSource(value = "reservationConflictProvider")
     void shouldNotAllowOverlappingReservationsForSameRoom(LocalDateTime firstCheckIn, LocalDateTime firstCheckOut, LocalDateTime secondCheckInOverLaped, LocalDateTime secondCheckOutOverLaped) {
         Room room102 = new Room("102", Status.AVAILABLE, 200.0);
-        Guest guest1 = new Guest("Marcos", 35);
-        Guest guest2 = new Guest("Fernanda", 29);
+        Guest guest1 = new Guest("Marcos", 35, "30639680054");
+        Guest guest2 = new Guest("Fernanda", 29, "15495812018");
 
         sut.createReservation(room102, guest1, firstCheckIn, firstCheckOut);
 
@@ -166,7 +166,7 @@ public class ReservationTest {
     @Tag("TDD")
     void shouldNotAllowReservationWhenCheckInIsAfterOrEqualToCheckOut(LocalDateTime invalidCheckIn, LocalDateTime invalidCheckOut) {
         Room room = new Room("201", Status.AVAILABLE, 150.0);
-        Guest guest = new Guest("João", 25);
+        Guest guest = new Guest("João", 25, "85856073002");
 
         assertThatThrownBy(() ->
                 sut.createReservation(room, guest, invalidCheckIn, invalidCheckOut)
@@ -181,7 +181,7 @@ public class ReservationTest {
     @Tag("TDD")
     void shouldNotAllowReservationWithPastDates(LocalDateTime pastCheckIn, LocalDateTime pastCheckOut) {
         Room room = new Room("301", Status.AVAILABLE, 180.0);
-        Guest guest = new Guest("Clara", 27);
+        Guest guest = new Guest("Clara", 27, "41237267048");
 
         assertThatThrownBy(() ->
                 sut.createReservation(room, guest, pastCheckIn, pastCheckOut)
@@ -194,7 +194,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldNotAllowReservationForNonExistingRoom() {
-        Guest guest = new Guest("Lucas", 27);
+        Guest guest = new Guest("Lucas", 27, "25971503057");
         LocalDateTime checkIn = LocalDateTime.of(2025, 11, 20, 14, 0);
         LocalDateTime checkOut = LocalDateTime.of(2025, 11, 22, 11, 0);
 
@@ -211,7 +211,7 @@ public class ReservationTest {
     @Tag("TDD")
     void shouldNotAllowReservationForRoomUnderMaintenance() {
         Room roomInMaintenance = new Room("401", Status.UNDER_MAINTENANCE, 300.0);
-        Guest guest = new Guest("Julia", 32);
+        Guest guest = new Guest("Julia", 32, "61708839011");
         LocalDateTime checkIn = LocalDateTime.of(2025, 12, 1, 14, 0);
         LocalDateTime checkOut = LocalDateTime.of(2025, 12, 3, 11, 0);
 
@@ -231,7 +231,7 @@ public class ReservationTest {
     @Tag("TDD")
     void shouldValidateGuestAgeForReservation(int age, boolean shouldSucceed) {
         Room room = new Room("301", Status.AVAILABLE, 180.0);
-        Guest guest = new Guest("Test Guest", age);
+        Guest guest = new Guest("Test Guest", age, "19663936010");
 
         LocalDateTime checkIn = LocalDateTime.of(2025, 12, 12, 14, 0);
         LocalDateTime checkOut = LocalDateTime.of(2025, 12, 13, 11, 0);
