@@ -4,6 +4,7 @@ import br.ifsp.demo.domain.*;
 import br.ifsp.demo.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ReservationTest {
 
@@ -52,4 +54,25 @@ public class ReservationTest {
         assertThat(obtained.getRoom().getId()).isEqualTo(room.getId());
         assertThat(obtained.getRoom().getStatus()).isEqualTo(Status.RESERVED);
     }
+
+    @Test
+    void shouldNotAllowOverlappingReservationsForSameRoom() {
+        Room room102 = new Room("102", Status.AVAILABLE, 200.0);
+        Guest guest1 = new Guest("Marcos", 35);
+        Guest guest2 = new Guest("Fernanda", 29);
+
+        LocalDate firstCheckIn = LocalDate.of(2025, 11, 10);
+        LocalDate firstCheckOut = LocalDate.of(2025, 11, 15);
+
+        sut.createReservation(room102, guest1, firstCheckIn, firstCheckOut);
+
+        LocalDate overlappingCheckIn = LocalDate.of(2025, 11, 12);
+        LocalDate overlappingCheckOut = LocalDate.of(2025, 11, 14);
+
+        assertThatThrownBy(() ->
+                sut.createReservation(room102, guest2, overlappingCheckIn, overlappingCheckOut))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("not available");
+    }
+
 }
