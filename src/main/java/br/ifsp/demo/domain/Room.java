@@ -1,15 +1,13 @@
 package br.ifsp.demo.domain;
 
-import java.util.UUID;
-
 public class Room {
 
-    private String id;
+    private final String id;
     private Status status;
-    private double price;
+    private final double price;
 
-    public Room(Status status, double price) {
-        this.id = UUID.randomUUID().toString();
+    public Room(String id, Status status, double price) {
+        this.id = id;
         this.status = status;
         this.price = price;
     }
