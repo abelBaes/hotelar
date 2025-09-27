@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
@@ -221,23 +222,30 @@ public class ReservationTest {
                 .hasMessageContaining("Room is under maintenance");
     }
 
-    @Test
+    @ParameterizedTest(name = "[{index}] Guest age={0} - Allowed={1}")
+    @CsvSource({
+            "17, false",
+            "18, true",
+            "19, true"
+    })
     @Tag("UnitTest")
     @Tag("TDD")
-    void shouldNotAllowReservationForMinorGuest() {
-        Room room = new Room("301", Status.AVAILABLE, 200.0);
-        Guest minor = new Guest("Lucas", 16);
+    void shouldValidateGuestAgeForReservation(int age, boolean shouldSucceed) {
+        Room room = new Room("301", Status.AVAILABLE, 180.0);
+        Guest guest = new Guest("Test Guest", age);
 
-        assertThatThrownBy(() ->
-                sut.createReservation(
-                        room,
-                        minor,
-                        LocalDateTime.of(2025, 11, 10, 14, 0),
-                        LocalDateTime.of(2025, 11, 11, 11, 0)
-                )
-        )
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Guest must be at least 18 years old");
+        LocalDateTime checkIn = LocalDateTime.of(2025, 12, 12, 14, 0);
+        LocalDateTime checkOut = LocalDateTime.of(2025, 12, 13, 11, 0);
+
+        if (shouldSucceed) {
+            Reservation reservation = sut.createReservation(room, guest, checkIn, checkOut);
+            assertThat(reservation).isNotNull();
+            assertThat(reservation.getGuest().getAge()).isGreaterThanOrEqualTo(18);
+        } else {
+            assertThatThrownBy(() -> sut.createReservation(room, guest, checkIn, checkOut))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("at least 18 years old");
+        }
     }
 
 
