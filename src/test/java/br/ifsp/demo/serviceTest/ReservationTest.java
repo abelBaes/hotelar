@@ -3,6 +3,7 @@ package br.ifsp.demo.serviceTest;
 import br.ifsp.demo.domain.*;
 import br.ifsp.demo.service.ReservationService;
 import net.bytebuddy.asm.MemberSubstitution;
+import org.codehaus.plexus.util.cli.Arg;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import javax.enterprise.inject.Stereotype;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
@@ -127,7 +129,20 @@ public class ReservationTest {
         );
     }
 
+    static Stream<Arguments> invalidGuestProvider() {
+        return Stream.of(
+                // Invalid CPF, rest valid
+                Arguments.of("Maria", 25, ""),
+                Arguments.of("João", 30, null),
 
+                // Invalid name, rest valid
+                Arguments.of("", 25, "66158381098"),
+                Arguments.of(null, 25, "83333159090"),
+
+                // Invalid age, rest valid
+                Arguments.of("Pedro", null, "22038920052")
+        );
+    }
 
     @ParameterizedTest
     @MethodSource("reservationProvider")
@@ -262,13 +277,14 @@ public class ReservationTest {
                 .hasMessageContaining("Guest must not be null");
     }
 
-    @Test
+    @ParameterizedTest (name = "[{index}] invalidGuest: name={0}, age={1}, cpf={2}")
+    @MethodSource(value = "invalidGuestProvider")
     @Tag("UnitTest")
     @Tag("TDD")
-    void shouldNotAllowReservationWithInvalidGuestData() {
+    void shouldNotAllowReservationWithInvalidGuestData(String name, Integer age, String cpf) {
         Room room = new Room("101", Status.AVAILABLE, 250.0);
 
-        Guest invalidGuest = new Guest("", null, "");
+        Guest invalidGuest = new Guest(name, age, cpf);
 
         LocalDateTime checkIn = LocalDateTime.of(2025, 10, 6, 14, 0);
         LocalDateTime checkOut = LocalDateTime.of(2025, 10, 8, 11, 0);
