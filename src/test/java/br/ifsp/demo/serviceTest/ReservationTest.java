@@ -189,5 +189,21 @@ public class ReservationTest {
                 .hasMessageContaining("Reservation dates must be in the future");
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotAllowReservationForNonExistingRoom() {
+        Guest guest = new Guest("Lucas", 27);
+        LocalDateTime checkIn = LocalDateTime.of(2025, 11, 20, 14, 0);
+        LocalDateTime checkOut = LocalDateTime.of(2025, 11, 22, 11, 0);
+
+        assertThatThrownBy(() ->
+                sut.createReservation(null, guest, checkIn, checkOut)
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Room does not exist");
+    }
+
+
 
 }
