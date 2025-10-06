@@ -3,8 +3,6 @@ package br.ifsp.demo.serviceTest;
 import br.ifsp.demo.domain.*;
 import br.ifsp.demo.repository.FakeReservationRepository;
 import br.ifsp.demo.service.ReservationService;
-import net.bytebuddy.asm.MemberSubstitution;
-import org.codehaus.plexus.util.cli.Arg;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -14,9 +12,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.enterprise.inject.Stereotype;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -313,6 +310,17 @@ public class ReservationTest {
                 .isNotEmpty()
                 .contains(extraService)
                 .doesNotContainNull();
+    }
+
+    @Test
+    @DisplayName("Should not be possible to add a extra service in an inexistent Reservation")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotBePossibleToAddAExtraServiceInAnInexistentReservation(){
+        ExtraService extraService = new ExtraService("Laundry", 30.0);
+        assertThatThrownBy(() -> sut.addExtraService("H-20251005223045384920",extraService))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("Reservation not found for id: H-20251005223045384920");
     }
 
 
