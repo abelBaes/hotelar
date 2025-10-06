@@ -130,6 +130,15 @@ public class ReservationTest {
         );
     }
 
+    static Stream<Arguments> changeReservationPeriodProvider(){
+        return Stream.of(
+                Arguments.of(new StayPeriod(LocalDateTime.of(2025, 10, 1, 14, 0),
+                        LocalDateTime.of(2025, 10, 10, 11, 0))),
+                Arguments.of(new StayPeriod(LocalDateTime.of(2025, 9, 1, 0, 0),
+                        LocalDateTime.of(2025, 10, 10, 0, 0)))
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("reservationProvider")
     @Tag("UnitTest")
@@ -496,4 +505,36 @@ public class ReservationTest {
         assertThat(guest.isVip()).isFalse();
     }
 
+    @DisplayName("Should be possible to change a Active Reservation Stay Period")
+    @ParameterizedTest(name = "[{index}] - New Stay Period of {0}")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    @MethodSource("changeReservationPeriodProvider")
+    void shouldBePossibleToChangeAnStayPeriodOfAActiveReservation(StayPeriod newStayPeriod){
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Lucas", 38, "78609833038");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
+                LocalDateTime.of(2025, 10, 10, 0, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+        Reservation obtained = sut.updateStayPeriod(reservation.getId(), newStayPeriod);
+
+        assertThat(obtained.getStayPeriod().getCheckin()).isEqualTo(newStayPeriod.getCheckin());
+        assertThat(obtained.getStayPeriod().getCheckout()).isEqualTo(newStayPeriod.getCheckout());
+    }
+
+    @DisplayName("Should not be possible to change a Active Reservation with invalid Stay Period")
+    @ParameterizedTest(name = "[{index}] - New Stay Period of {0}")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    @MethodSource("invalidDatesProvider")
+    void shouldNotBePossibleToChangeAActiveReservationWithInvalidStayPeriod(StayPeriod invalidStayPeriod){
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Lucas", 38, "78609833038");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
+                LocalDateTime.of(2025, 10, 10, 0, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+        assertThatThrownBy(() -> sut.updateStayPeriod(reservation.getId(), invalidStayPeriod))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Check-in date must be before check-out date");
+    }
 }

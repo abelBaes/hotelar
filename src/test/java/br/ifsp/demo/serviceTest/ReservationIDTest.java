@@ -43,15 +43,25 @@ public class ReservationIDTest {
         assertThat(ReservationIDService.validate(ValidReservationId)).isTrue();
     }
 
-    @DisplayName("Should validate an invalid Reservation ID.")
+    @DisplayName("Should throw IllegalArgumentException when validate an invalid Reservation ID.")
     @ParameterizedTest(name = "[{index}] - Invalid ID {0}")
     @Tag("UnitTest")
     @Tag("TDD")
     @MethodSource("invalidIDProvider")
-    void shouldFalseToAnInvalidReservationID(String invalidID){
+    void shouldThrowIllegalArgumentExceptionToAnInvalidReservationID(String invalidID){
         assertThatThrownBy(() -> ReservationIDService.validate(invalidID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid Reservation ID format");
+    }
+
+    @Test
+    @DisplayName("Should throw an NullPointerException when Reservation ID is null.")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowAnNullPointerExceptionWhenReservationIdIsNull(){
+        assertThatThrownBy(() -> ReservationIDService.validate(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("Reservation ID must not be null");
     }
 
 }

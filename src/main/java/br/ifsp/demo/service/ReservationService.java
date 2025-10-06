@@ -124,4 +124,14 @@ public class ReservationService {
     private double applyVipDiscount(double totalAmount, boolean isVip) {
         return isVip ? totalAmount * VIP_DISCOUNT_RATE : totalAmount;
     }
+
+    public Reservation updateStayPeriod(String reservationId, StayPeriod newStayPeriod){
+        validateStayPeriod(newStayPeriod);
+
+        Reservation reservation = reservationRepository.findById(reservationId).get();
+        reservation.setStayPeriod(newStayPeriod);
+        reservationRepository.update(reservation);
+
+        return reservation;
+    }
 }
