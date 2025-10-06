@@ -5,17 +5,21 @@ import java.time.LocalDateTime;
 
 public class Reservation {
 
+    private final String id;
     private final Room room;
     private final Guest guest;
-    private final LocalDateTime checkIn;
-    private final LocalDateTime checkOut;
+    private final StayPeriod stayPeriod;
+    private final ReservationStatus reservationStatus;
 
-    public Reservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
+    public Reservation(String id, Room room, Guest guest, StayPeriod stayPeriod, ReservationStatus reservationStatus) {
+        this.id = id;
         this.room = room;
         this.guest = guest;
-        this.checkIn = checkIn;
-        this.checkOut = checkOut;
+        this.stayPeriod = stayPeriod;
+        this.reservationStatus = reservationStatus;
     }
+
+    public String getId() { return id; }
 
     public Room getRoom() {
         return room;
@@ -25,11 +29,7 @@ public class Reservation {
         return guest;
     }
 
-    public LocalDateTime getCheckIn() {
-        return checkIn;
-    }
+    public StayPeriod getStayPeriod() { return stayPeriod; }
 
-    public LocalDateTime getCheckOut() {
-        return checkOut;
-    }
+    public ReservationStatus getReservationStatus() { return reservationStatus; }
 }

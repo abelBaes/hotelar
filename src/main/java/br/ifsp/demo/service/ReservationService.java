@@ -1,6 +1,7 @@
 package br.ifsp.demo.service;
 
 import br.ifsp.demo.domain.*;
+import br.ifsp.demo.repository.ReservationRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,17 +10,24 @@ import java.util.Objects;
 
 public class ReservationService {
 
-    private final List<Reservation> reservations = new ArrayList<>();
+    private final ReservationRepository reservationRepository;
 
-    public Reservation createReservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
+    public ReservationService(ReservationRepository reservationRepository) {
+        this.reservationRepository = reservationRepository;
+    }
+
+    public Reservation createReservation(Room room, Guest guest, StayPeriod stayPeriod) {
         validateGuest(guest);
         validateRoom(room);
-        validateDates(checkIn, checkOut);
-        validateAvailability(room, checkIn, checkOut);
+        validateStayPeriod(stayPeriod);
+        validateAvailability(room, stayPeriod);
 
-        Reservation reservation = new Reservation(room, guest, checkIn, checkOut);
-        reservations.add(reservation);
-        room.setStatus(Status.RESERVED);
+        Reservation reservation = new Reservation(ReservationIDService.generate(LocalDateTime.now()),
+                room,
+                guest,
+                stayPeriod,
+                ReservationStatus.ACTIVE);
+        reservationRepository.save(reservation);
 
         return reservation;
     }
@@ -41,12 +49,15 @@ public class ReservationService {
     private void validateRoom(Room room) {
         Objects.requireNonNull(room, "Room does not exist");
 
-        if (room.getStatus() == Status.UNDER_MAINTENANCE) {
+        if (room.getStatus() == RoomStatus.UNDER_MAINTENANCE) {
             throw new IllegalStateException("Room is under maintenance");
         }
     }
 
-    private void validateDates(LocalDateTime checkIn, LocalDateTime checkOut) {
+    private void validateStayPeriod(StayPeriod stayPeriod) {
+        LocalDateTime checkIn = stayPeriod.getCheckin();
+        LocalDateTime checkOut = stayPeriod.getCheckout();
+
         if (checkIn.isAfter(checkOut) || checkIn.isEqual(checkOut)) {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
         }
@@ -56,11 +67,12 @@ public class ReservationService {
         }
     }
 
-    private void validateAvailability(Room room, LocalDateTime checkIn, LocalDateTime checkOut) {
-        for (Reservation existing : reservations) {
-            if (existing.getRoom().getId().equals(room.getId())) {
-                boolean overlap = checkIn.isBefore(existing.getCheckOut())
-                        && checkOut.isAfter(existing.getCheckIn());
+    private void validateAvailability(Room room, StayPeriod stayPeriod) {
+
+        for (Reservation savedReservation : reservationRepository.findAll()) {
+            if (savedReservation.getRoom().getId().equals(room.getId())) {
+                boolean overlap = stayPeriod.getCheckin().isBefore(savedReservation.getStayPeriod().getCheckout())
+                        && stayPeriod.getCheckout().isAfter(savedReservation.getStayPeriod().getCheckin());
                 if (overlap) {
                     throw new IllegalStateException("Room " + room.getId() + " not available for the selected period");
                 }
@@ -69,6 +81,6 @@ public class ReservationService {
     }
 
     public List<Reservation> getAllReservations() {
-        return reservations;
+        return reservationRepository.findAll();
     }
 }

@@ -1,6 +1,7 @@
 package br.ifsp.demo.serviceTest;
 
 import br.ifsp.demo.domain.*;
+import br.ifsp.demo.repository.FakeReservationRepository;
 import br.ifsp.demo.service.ReservationService;
 import net.bytebuddy.asm.MemberSubstitution;
 import org.codehaus.plexus.util.cli.Arg;
@@ -26,24 +27,24 @@ public class ReservationTest {
 
     @BeforeEach
     void setup() {
-        sut = new ReservationService();
+        sut = new ReservationService(new FakeReservationRepository());
     }
 
     static Stream<Arguments> reservationProvider() {
         return Stream.of(
                 Arguments.of(
-                        new Room("101", Status.AVAILABLE, 250.0),
+                        new Room("101", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Maria", 30, "78609833038"),
                         new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
                                 LocalDateTime.of(2025, 10, 7, 11, 0))
                 ),
                 Arguments.of(
-                        new Room("102", Status.AVAILABLE, 250.0),
+                        new Room("102", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Pedro", 30, "75352394042"),
                         new StayPeriod(LocalDateTime.of(2025, 10, 15, 14, 0),
                                 LocalDateTime.of(2025, 10, 16, 11, 0))
                 ), Arguments.of(
-                        new Room("102", Status.AVAILABLE, 250.0),
+                        new Room("102", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Pedro", 30, "00356457095"),
                         new StayPeriod(LocalDateTime.of(2025, 10, 16, 12, 0),
                                 LocalDateTime.of(2025, 10, 18, 11, 0))
@@ -171,7 +172,7 @@ public class ReservationTest {
         assertThat(sut.getAllReservations()).isNotEmpty();
         assertThat(obtained.getGuest().getName()).isEqualTo(guest.getName());
         assertThat(obtained.getRoom().getId()).isEqualTo(room.getId());
-        assertThat(obtained.getStatus()).isEqualTo(ReservationStatus.ACTIVE);
+        assertThat(obtained.getReservationStatus()).isEqualTo(ReservationStatus.ACTIVE);
     }
 
     @ParameterizedTest(name = "[{index}] Overlap: {0} - {1} with {2} - {3}")
@@ -179,7 +180,7 @@ public class ReservationTest {
     @Tag("TDD")
     @MethodSource(value = "reservationConflictProvider")
     void shouldNotAllowOverlappingReservationsForSameRoom(StayPeriod firsStayPeriod, StayPeriod secondStayPeriod) {
-        Room room102 = new Room("102", Status.AVAILABLE, 200.0);
+        Room room102 = new Room("102", RoomStatus.AVAILABLE, 200.0);
         Guest guest1 = new Guest("Marcos", 35, "30639680054");
         Guest guest2 = new Guest("Fernanda", 29, "15495812018");
 
@@ -196,7 +197,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldNotAllowReservationWhenCheckInIsAfterOrEqualToCheckOut(StayPeriod invalidStayPeriod) {
-        Room room = new Room("201", Status.AVAILABLE, 150.0);
+        Room room = new Room("201", RoomStatus.AVAILABLE, 150.0);
         Guest guest = new Guest("João", 25, "85856073002");
 
         assertThatThrownBy(() ->
@@ -211,7 +212,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldNotAllowReservationWithPastDates(StayPeriod pastStayPeriod) {
-        Room room = new Room("301", Status.AVAILABLE,180.0);
+        Room room = new Room("301", RoomStatus.AVAILABLE,180.0);
         Guest guest = new Guest("Clara", 27, "41237267048");
 
         assertThatThrownBy(() ->
@@ -241,7 +242,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldNotAllowReservationForRoomUnderMaintenance() {
-        Room roomInMaintenance = new Room("401", Status.UNDER_MAINTENANCE, 300.0);
+        Room roomInMaintenance = new Room("401", RoomStatus.UNDER_MAINTENANCE, 300.0);
         Guest guest = new Guest("Julia", 32, "61708839011");
         StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 1, 14, 0),
                 LocalDateTime.of(2025, 12, 3, 11, 0));
@@ -261,7 +262,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldValidateGuestAgeForReservation(int age, boolean shouldSucceed) {
-        Room room = new Room("301", Status.AVAILABLE, 180.0);
+        Room room = new Room("301", RoomStatus.AVAILABLE, 180.0);
         Guest guest = new Guest("Test Guest", age, "19663936010");
 
         StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 12, 14, 0),
@@ -282,7 +283,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldNotAllowReservationWithoutGuest() {
-        Room room = new Room("301", Status.AVAILABLE, 200.0);
+        Room room = new Room("301", RoomStatus.AVAILABLE, 200.0);
 
         assertThatThrownBy(() ->
                 sut.createReservation(room, null,
@@ -298,7 +299,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldNotAllowReservationWithInvalidGuestData(String name, Integer age, String cpf) {
-        Room room = new Room("101", Status.AVAILABLE, 250.0);
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest invalidGuest = new Guest(name, age, cpf);
         StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
                 LocalDateTime.of(2025, 10, 8, 11, 0));

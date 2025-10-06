@@ -1,7 +1,6 @@
 package br.ifsp.demo.domain;
 
-public enum Status {
+public enum RoomStatus {
     AVAILABLE,
-    RESERVED,
     UNDER_MAINTENANCE
 }
