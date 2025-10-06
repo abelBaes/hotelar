@@ -16,6 +16,12 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void update(Reservation newReservation) {
+        reservations.removeIf(reservation -> reservation.getId().equals(newReservation.getId()));
+        reservations.add(newReservation);
+    }
+
+    @Override
     public Optional<Reservation> findById(String id) {
         return reservations.stream()
                 .filter(reservation -> reservation.getId().equals(id))

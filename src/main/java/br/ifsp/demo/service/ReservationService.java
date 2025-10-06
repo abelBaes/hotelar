@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ReservationService {
 
@@ -82,5 +83,12 @@ public class ReservationService {
 
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
+    }
+
+    public Reservation addExtraService(String reservationId, ExtraService service){
+        Optional<Reservation> reservation = reservationRepository.findById(reservationId);
+        reservation.get().appendExtraService(service);
+        reservationRepository.update(reservation.get());
+        return reservation.get();
     }
 }

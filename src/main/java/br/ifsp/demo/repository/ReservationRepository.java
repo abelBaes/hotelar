@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface ReservationRepository {
     void save(Reservation reservation);
 
+    void update(Reservation newReservation);
+
     Optional<Reservation> findById(String id);
 
     List<Reservation> findAll();

@@ -324,7 +324,7 @@ public class ReservationTest {
         Reservation reservation = sut.createReservation(room, guest, stayPeriod);
 
         ExtraService extraService = new ExtraService("Laundry", 30.0);
-        assertThat(sut.addExtraService(reservation.getId(), extraService).getExtraService)
+        assertThat(sut.addExtraService(reservation.getId(), extraService).getExtraServices())
                 .isNotEmpty()
                 .contains(extraService)
                 .doesNotContainNull();
