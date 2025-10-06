@@ -325,7 +325,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("TDD")
     @MethodSource("invalidDatesProvider")
-    void shouldnOTBePossibleToChangeAActiveReservationWithInvalidStayPeriod(StayPeriod invalidStayPeriod){
+    void shouldNotBePossibleToChangeAActiveReservationWithInvalidStayPeriod(StayPeriod invalidStayPeriod){
         Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest guest = new Guest("Lucas", 38, "78609833038");
         StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
