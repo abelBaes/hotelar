@@ -22,6 +22,7 @@ public class ReservationIDService {
     }
 
     private static boolean isValid(String id) {
+        if(id == null) throw new NullPointerException("Reservation ID must not be null");
         return VALID_ID_PATTERN.matcher(id).matches();
     }
 
