@@ -10,7 +10,7 @@ public class Reservation {
     private final String id;
     private final Room room;
     private final Guest guest;
-    private final StayPeriod stayPeriod;
+    private StayPeriod stayPeriod;
     private final ReservationStatus reservationStatus;
     private final List<ExtraService> extraServices = new ArrayList<>();
 
@@ -42,5 +42,9 @@ public class Reservation {
 
     public void appendExtraService(ExtraService extraService){
         this.extraServices.add(extraService);
+    }
+
+    public void setStayPeriod(StayPeriod stayPeriod) {
+        this.stayPeriod = stayPeriod;
     }
 }

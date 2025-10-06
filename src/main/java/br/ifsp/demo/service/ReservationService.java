@@ -88,4 +88,12 @@ public class ReservationService {
         reservationRepository.update(reservation);
         return reservation;
     }
+
+    public Reservation updateStayPeriod(String reservationId, StayPeriod newStayPeriod){
+         Reservation reservation = reservationRepository.findById(reservationId).get();
+         reservation.setStayPeriod(newStayPeriod);
+         reservationRepository.update(reservation);
+
+         return reservation;
+    }
 }
