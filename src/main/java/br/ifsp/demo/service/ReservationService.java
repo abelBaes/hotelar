@@ -80,12 +80,12 @@ public class ReservationService {
     }
 
     public Reservation addExtraService(String reservationId, ExtraService service){
-        Optional<Reservation> reservation = reservationRepository.findById(reservationId);
+        ReservationIDService.validate(reservationId);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
 
-        if (reservation.isEmpty()) throw new NoSuchElementException("Reservation not found for id: " + reservationId);
-
-        reservation.get().appendExtraService(service);
-        reservationRepository.update(reservation.get());
-        return reservation.get();
+        reservation.appendExtraService(service);
+        reservationRepository.update(reservation);
+        return reservation;
     }
 }
