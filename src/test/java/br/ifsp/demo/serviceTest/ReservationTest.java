@@ -317,7 +317,7 @@ public class ReservationTest {
         Reservation obtained = sut.updateStayPeriod(reservation.getId(), newStayPeriod);
 
         assertThat(obtained.getStayPeriod().getCheckin()).isEqualTo(newStayPeriod.getCheckin());
-        assertThat(obtained.getStayPeriod().getCheckin()).isEqualTo(newStayPeriod.getCheckout());
+        assertThat(obtained.getStayPeriod().getCheckout()).isEqualTo(newStayPeriod.getCheckout());
     }
 
 
