@@ -320,6 +320,24 @@ public class ReservationTest {
         assertThat(obtained.getStayPeriod().getCheckout()).isEqualTo(newStayPeriod.getCheckout());
     }
 
+    @DisplayName("Should not be possible to change a Active Reservation with invalid Stay Period")
+    @ParameterizedTest(name = "[{index}] - New Stay Period of {0}")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    @MethodSource("invalidDatesProvider")
+    void shouldnOTBePossibleToChangeAActiveReservationWithInvalidStayPeriod(StayPeriod invalidStayPeriod){
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Lucas", 38, "78609833038");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
+                LocalDateTime.of(2025, 10, 10, 0, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+        assertThatThrownBy(() -> sut.updateStayPeriod(reservation.getId(), invalidStayPeriod))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Check-in date must be before check-out date");
+    }
+
+
+
 
 
 
