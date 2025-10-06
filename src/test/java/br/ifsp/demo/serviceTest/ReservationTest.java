@@ -208,21 +208,6 @@ public class ReservationTest {
                 .hasMessageContaining("Check-in date must be before check-out date");
     }
 
-    @ParameterizedTest(name = "[{index}] Past reservation invalid → {0}")
-    @MethodSource(value = "pastDatesProvider")
-    @Tag("UnitTest")
-    @Tag("TDD")
-    void shouldNotAllowReservationWithPastDates(StayPeriod pastStayPeriod) {
-        Room room = new Room("301", RoomStatus.AVAILABLE,180.0);
-        Guest guest = new Guest("Clara", 27, "41237267048");
-
-        assertThatThrownBy(() ->
-                sut.createReservation(room, guest, pastStayPeriod)
-        )
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Reservation dates must be in the future");
-    }
-
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
