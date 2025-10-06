@@ -54,4 +54,14 @@ public class ReservationIDTest {
                 .hasMessageContaining("Invalid Reservation ID format");
     }
 
+    @Test
+    @DisplayName("Should throw an NullPointerException when Reservation ID is null.")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowAnNullPointerExceptionWhenReservationIdIsNull(){
+        assertThatThrownBy(() -> ReservationIDService.validate(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("Reservation ID must not be null");
+    }
+
 }
