@@ -294,6 +294,46 @@ public class ReservationTest {
                 .hasMessageContaining("Reservation not found for id: H-20251005223045384920");
     }
 
+    @Test
+    @DisplayName("Should apply 15% discount for VIP guest during checkout")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldApplyFifteenPercentDiscountForVipGuestDuringCheckout() {
+        // Arrange
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest vipGuest = new Guest("VIP Guest", 30, "78609833038", true);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
+                LocalDateTime.of(2025, 10, 8, 11, 0));
+        Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
+
+        // Act
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // Assert
+        // 2 nights * 250.0 = 500.0, com desconto de 15% = 425.0
+        assertThat(totalAmount).isEqualTo(425.0);
+    }
+
+    @Test
+    @DisplayName("Should not apply discount for non-VIP guest during checkout")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotApplyDiscountForNonVipGuestDuringCheckout() {
+        // Arrange
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest regularGuest = new Guest("Regular Guest", 30, "78609833038", false);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
+                LocalDateTime.of(2025, 10, 8, 11, 0));
+        Reservation reservation = sut.createReservation(room, regularGuest, stayPeriod);
+
+        // Act
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // Assert
+        // 2 nights * 250.0 = 500.0, sem desconto = 500.0
+        assertThat(totalAmount).isEqualTo(500.0);
+    }
+
 
 
 
