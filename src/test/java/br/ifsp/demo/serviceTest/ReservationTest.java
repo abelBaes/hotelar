@@ -33,19 +33,19 @@ public class ReservationTest {
                 Arguments.of(
                         new Room("101", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Maria", 30, "78609833038"),
-                        new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
-                                LocalDateTime.of(2025, 10, 7, 11, 0))
+                        new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                                LocalDateTime.now().plusDays(2).withHour(11).withMinute(0))
                 ),
                 Arguments.of(
                         new Room("102", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Pedro", 30, "75352394042"),
-                        new StayPeriod(LocalDateTime.of(2025, 10, 15, 14, 0),
-                                LocalDateTime.of(2025, 10, 16, 11, 0))
+                        new StayPeriod(LocalDateTime.now().plusDays(2).withHour(14).withMinute(0),
+                                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0))
                 ), Arguments.of(
                         new Room("102", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Pedro", 30, "00356457095"),
-                        new StayPeriod(LocalDateTime.of(2025, 10, 16, 12, 0),
-                                LocalDateTime.of(2025, 10, 18, 11, 0))
+                        new StayPeriod(LocalDateTime.now().plusDays(3).withHour(12).withMinute(0),
+                                LocalDateTime.now().plusDays(5).withHour(11).withMinute(0))
                 )
         );
     }
@@ -281,8 +281,8 @@ public class ReservationTest {
     void shouldBePossibleToAddAExtraServiceInAnActiveReservation(){
         Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest guest = new Guest("Lucas", 38, "78609833038");
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
-                LocalDateTime.of(2025, 10, 8, 11, 0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
         Reservation reservation = sut.createReservation(room, guest, stayPeriod);
 
         ExtraService extraService = new ExtraService("Laundry", 30.0);
@@ -301,6 +301,208 @@ public class ReservationTest {
         assertThatThrownBy(() -> sut.addExtraService("H-20251005223045384920",extraService))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("Reservation not found for id: H-20251005223045384920");
+    }
+
+    @Test
+    @DisplayName("Should apply 15% discount for VIP guest during checkout")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldApplyFifteenPercentDiscountForVipGuestDuringCheckout() {
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest vipGuest = new Guest("VIP Guest", 30, "78609833038", true);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
+        Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
+
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // 2 nights * 250.0 = 500.0, com desconto de 15% = 425.0
+        assertThat(totalAmount).isEqualTo(425.0);
+    }
+
+    @Test
+    @DisplayName("Should not apply discount for non-VIP guest during checkout")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotApplyDiscountForNonVipGuestDuringCheckout() {
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest regularGuest = new Guest("Regular Guest", 30, "78609833038", false);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
+        Reservation reservation = sut.createReservation(room, regularGuest, stayPeriod);
+
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // 2 nights * 250.0 = 500.0, sem desconto = 500.0
+        assertThat(totalAmount).isEqualTo(500.0);
+    }
+    
+    @Test
+    @DisplayName("Should throw exception when checkout with non-existent reservation ID")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldThrowExceptionWhenCheckoutWithNonExistentReservationId() {
+        String nonExistentId = "non-existent-id";
+        assertThatThrownBy(() -> sut.checkout(nonExistentId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Reservation not found");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when checkout with null reservation ID")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldThrowExceptionWhenCheckoutWithNullReservationId() {
+        assertThatThrownBy(() -> sut.checkout(null))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Reservation not found");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when checkout with empty reservation ID")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldThrowExceptionWhenCheckoutWithEmptyReservationId() {
+        assertThatThrownBy(() -> sut.checkout(""))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Reservation not found");
+    }
+
+    @Test
+    @DisplayName("Should apply correct VIP discount for single night stay")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldApplyCorrectVipDiscountForSingleNightStay() {
+        Room room = new Room("102", RoomStatus.AVAILABLE, 300.0);
+        Guest vipGuest = new Guest("VIP Guest", 35, "12345678901", true);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(2).withHour(11).withMinute(0));
+        Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
+
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // 1 night * 300.0 = 300.0, com desconto de 15% = 255.0
+        assertThat(totalAmount).isEqualTo(255.0);
+    }
+
+    @Test
+    @DisplayName("Should apply correct VIP discount for long stay (7 nights)")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldApplyCorrectVipDiscountForLongStay() {
+        Room room = new Room("103", RoomStatus.AVAILABLE, 200.0);
+        Guest vipGuest = new Guest("VIP Guest", 40, "98765432100", true);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(8).withHour(11).withMinute(0));
+        Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
+
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // 7 nights * 200.0 = 1400.0, com desconto de 15% = 1190.0
+        assertThat(totalAmount).isEqualTo(1190.0);
+    }
+
+    @Test
+    @DisplayName("Should apply VIP discount with extra services")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldApplyVipDiscountWithExtraServices() {
+        Room room = new Room("104", RoomStatus.AVAILABLE, 150.0);
+        Guest vipGuest = new Guest("VIP Guest", 25, "11122233344", true);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
+        Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
+        
+        ExtraService wifi = new ExtraService("WiFi", 50.0);
+        ExtraService breakfast = new ExtraService("Breakfast", 30.0);
+        sut.addExtraService(reservation.getId(), wifi);
+        sut.addExtraService(reservation.getId(), breakfast);
+
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // (2 nights * 150.0 + 50.0 + 30.0) * 0.85 = (300.0 + 80.0) * 0.85 = 323.0
+        assertThat(totalAmount).isEqualTo(323.0);
+    }
+
+    @Test
+    @DisplayName("Should not apply discount for non-VIP guest with extra services")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldNotApplyDiscountForNonVipGuestWithExtraServices() {
+        Room room = new Room("105", RoomStatus.AVAILABLE, 180.0);
+        Guest regularGuest = new Guest("Regular Guest", 28, "55566677788", false);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(4).withHour(11).withMinute(0));
+        Reservation reservation = sut.createReservation(room, regularGuest, stayPeriod);
+        
+        ExtraService spa = new ExtraService("Spa", 100.0);
+        sut.addExtraService(reservation.getId(), spa);
+
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // 3 nights * 180.0 + 100.0 = 540.0 + 100.0 = 640.0 (sem desconto)
+        assertThat(totalAmount).isEqualTo(640.0);
+    }
+
+    @Test
+    @DisplayName("Should handle zero-price room correctly for VIP guest")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldHandleZeroPriceRoomCorrectlyForVipGuest() {
+        Room room = new Room("106", RoomStatus.AVAILABLE, 0.0);
+        Guest vipGuest = new Guest("VIP Guest", 30, "99988877766", true);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(2).withHour(11).withMinute(0));
+        Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
+
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // 1 night * 0.0 = 0.0, com desconto de 15% = 0.0
+        assertThat(totalAmount).isEqualTo(0.0);
+    }
+
+    @Test
+    @DisplayName("Should handle high-price room correctly for VIP guest")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldHandleHighPriceRoomCorrectlyForVipGuest() {
+        Room room = new Room("107", RoomStatus.AVAILABLE, 10000.0);
+        Guest vipGuest = new Guest("VIP Guest", 45, "44455566677", true);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(2).withHour(11).withMinute(0));
+        Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
+
+        double totalAmount = sut.checkout(reservation.getId());
+
+        // 1 night * 10000.0 = 10000.0, com desconto de 15% = 8500.0
+        assertThat(totalAmount).isEqualTo(8500.0);
+    }
+
+    @Test
+    @DisplayName("Should verify Guest isVip method returns correct value for VIP guest")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldVerifyGuestIsVipMethodReturnsCorrectValueForVipGuest() {
+        Guest vipGuest = new Guest("VIP Guest", 30, "12345678901", true);
+        assertThat(vipGuest.isVip()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should verify Guest isVip method returns correct value for non-VIP guest")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldVerifyGuestIsVipMethodReturnsCorrectValueForNonVipGuest() {
+        Guest regularGuest = new Guest("Regular Guest", 30, "12345678901", false);
+        assertThat(regularGuest.isVip()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should verify Guest isVip method returns false when using default constructor")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldVerifyGuestIsVipMethodReturnsFalseWhenUsingDefaultConstructor() {
+        Guest guest = new Guest("Guest", 30, "12345678901");
+        assertThat(guest.isVip()).isFalse();
     }
 
     @DisplayName("Should be possible to change a Active Reservation Stay Period")
@@ -335,11 +537,4 @@ public class ReservationTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Check-in date must be before check-out date");
     }
-
-
-
-
-
-
-
 }

@@ -4,10 +4,13 @@ import br.ifsp.demo.domain.*;
 import br.ifsp.demo.repository.ReservationRepository;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class ReservationService {
-
+    
+    private static final double VIP_DISCOUNT_RATE = 0.85; // 15% discount for VIP guests
+    
     private final ReservationRepository reservationRepository;
 
     public ReservationService(ReservationRepository reservationRepository) {
@@ -87,6 +90,39 @@ public class ReservationService {
         reservation.appendExtraService(service);
         reservationRepository.update(reservation);
         return reservation;
+    }
+
+    public double checkout(String reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+        
+        long nights = calculateNights(reservation.getStayPeriod());
+        double baseAmount = calculateBaseAmount(reservation.getRoom(), nights);
+        double extraServicesAmount = calculateExtraServicesAmount(reservation.getExtraServices());
+        double totalAmount = baseAmount + extraServicesAmount;
+        
+        return applyVipDiscount(totalAmount, reservation.getGuest().isVip());
+    }
+    
+    private long calculateNights(StayPeriod stayPeriod) {
+        return ChronoUnit.DAYS.between(
+            stayPeriod.getCheckin().toLocalDate(),
+            stayPeriod.getCheckout().toLocalDate()
+        );
+    }
+    
+    private double calculateBaseAmount(Room room, long nights) {
+        return room.getPrice() * nights;
+    }
+    
+    private double calculateExtraServicesAmount(List<ExtraService> extraServices) {
+        return extraServices.stream()
+            .mapToDouble(ExtraService::getValue)
+            .sum();
+    }
+    
+    private double applyVipDiscount(double totalAmount, boolean isVip) {
+        return isVip ? totalAmount * VIP_DISCOUNT_RATE : totalAmount;
     }
 
     public Reservation updateStayPeriod(String reservationId, StayPeriod newStayPeriod){
