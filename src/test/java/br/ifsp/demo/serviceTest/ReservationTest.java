@@ -115,35 +115,6 @@ public class ReservationTest {
         );
     }
 
-    static Stream<Arguments> pastDatesProvider() {
-        return Stream.of(
-                Arguments.of(
-                        new StayPeriod(
-                                LocalDateTime.now().minusDays(1),
-                                LocalDateTime.now().plusDays(1)
-                        )
-                ),
-                Arguments.of(
-                        new StayPeriod(
-                                LocalDateTime.now().minusHours(1),
-                                LocalDateTime.now().plusHours(5)
-                        )
-                ),
-                Arguments.of(
-                        new StayPeriod(
-                                LocalDateTime.now().minusMinutes(1),
-                                LocalDateTime.now().plusDays(2)
-                        )
-                ),
-                Arguments.of(
-                        new StayPeriod(
-                                LocalDateTime.now().minusDays(2),
-                                LocalDateTime.now().minusDays(1)
-                        )
-                )
-        );
-    }
-
     static Stream<Arguments> invalidGuestProvider() {
         return Stream.of(
                 // Invalid CPF, rest valid
