@@ -34,55 +34,55 @@ public class ReservationTest {
                 Arguments.of(
                         new Room("101", Status.AVAILABLE, 250.0),
                         new Guest("Maria", 30, "78609833038"),
-                        LocalDateTime.of(2025, 10, 6, 14, 0),
-                        LocalDateTime.of(2025, 10, 7, 11, 0)
+                        new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
+                                LocalDateTime.of(2025, 10, 7, 11, 0))
                 ),
                 Arguments.of(
                         new Room("102", Status.AVAILABLE, 250.0),
                         new Guest("Pedro", 30, "75352394042"),
-                        LocalDateTime.of(2025, 10, 15, 14, 0),
-                        LocalDateTime.of(2025, 10, 16, 11, 0)
+                        new StayPeriod(LocalDateTime.of(2025, 10, 15, 14, 0),
+                                LocalDateTime.of(2025, 10, 16, 11, 0))
                 ), Arguments.of(
                         new Room("102", Status.AVAILABLE, 250.0),
                         new Guest("Pedro", 30, "00356457095"),
-                        LocalDateTime.of(2025, 10, 16, 12, 0),
-                        LocalDateTime.of(2025, 10, 18, 11, 0)
+                        new StayPeriod(LocalDateTime.of(2025, 10, 16, 12, 0),
+                                LocalDateTime.of(2025, 10, 18, 11, 0))
                 )
         );
     }
 
 
     static Stream<Arguments> reservationConflictProvider() {
+        StayPeriod basePeriod = new StayPeriod(
+                LocalDateTime.of(2025, 11, 10, 14, 0),
+                LocalDateTime.of(2025, 11, 15, 12, 0)
+        );
+
         return Stream.of(
                 Arguments.of(
-                        LocalDateTime.of(2025, 11, 10, 14, 0),
-                        LocalDateTime.of(2025, 11, 15, 12, 0),
-                        LocalDateTime.of(2025, 11, 12, 10, 0),
-                        LocalDateTime.of(2025, 11, 14, 11, 0)
+                        basePeriod,
+                        new StayPeriod(LocalDateTime.of(2025, 11, 12, 10, 0),
+                                LocalDateTime.of(2025, 11, 14, 11, 0))
                 ),
                 Arguments.of(
-                        LocalDateTime.of(2025, 11, 10, 14, 0),
-                        LocalDateTime.of(2025, 11, 15, 12, 0),
-                        LocalDateTime.of(2025, 11, 9, 23, 59),
-                        LocalDateTime.of(2025, 11, 11, 9, 0)
+                        basePeriod,
+                        new StayPeriod(LocalDateTime.of(2025, 11, 9, 23, 59),
+                                LocalDateTime.of(2025, 11, 11, 9, 0))
                 ),
                 Arguments.of(
-                        LocalDateTime.of(2025, 11, 10, 14, 0),
-                        LocalDateTime.of(2025, 11, 15, 12, 0),
-                        LocalDateTime.of(2025, 11, 10, 14, 0),
-                        LocalDateTime.of(2025, 11, 16, 0, 0)
+                        basePeriod,
+                        new StayPeriod(LocalDateTime.of(2025, 11, 10, 14, 0),
+                                LocalDateTime.of(2025, 11, 16, 0, 0))
                 ),
                 Arguments.of(
-                        LocalDateTime.of(2025, 11, 10, 14, 0),
-                        LocalDateTime.of(2025, 11, 15, 12, 0),
-                        LocalDateTime.of(2025, 11, 11, 8, 0),
-                        LocalDateTime.of(2025, 11, 15, 12, 0)
+                        basePeriod,
+                        new StayPeriod(LocalDateTime.of(2025, 11, 11, 8, 0),
+                                LocalDateTime.of(2025, 11, 15, 12, 0))
                 ),
                 Arguments.of(
-                        LocalDateTime.of(2025, 11, 10, 14, 0),
-                        LocalDateTime.of(2025, 11, 15, 12, 0),
-                        LocalDateTime.of(2025, 11, 14, 0, 0),
-                        LocalDateTime.of(2025, 11, 18, 12, 0)
+                        basePeriod,
+                        new StayPeriod(LocalDateTime.of(2025, 11, 14, 0, 0),
+                                LocalDateTime.of(2025, 11, 18, 12, 0))
                 )
         );
     }
@@ -90,20 +90,28 @@ public class ReservationTest {
     static Stream<Arguments> invalidDatesProvider() {
         return Stream.of(
                 Arguments.of(
-                        LocalDateTime.of(2025, 10, 10, 14, 0),
-                        LocalDateTime.of(2025, 10, 10, 14, 0)
+                        new StayPeriod(
+                                LocalDateTime.of(2025, 10, 10, 14, 0),
+                                LocalDateTime.of(2025, 10, 10, 14, 0)
+                        )
                 ),
                 Arguments.of(
-                        LocalDateTime.of(2025, 10, 12, 14, 0),
-                        LocalDateTime.of(2025, 10, 11, 11, 0)
+                        new StayPeriod(
+                                LocalDateTime.of(2025, 10, 12, 14, 0),
+                                LocalDateTime.of(2025, 10, 11, 11, 0)
+                        )
                 ),
                 Arguments.of(
-                        LocalDateTime.of(2025, 10, 10, 14, 0),
-                        LocalDateTime.of(2025, 10, 10, 13, 59)
+                        new StayPeriod(
+                                LocalDateTime.of(2025, 10, 10, 14, 0),
+                                LocalDateTime.of(2025, 10, 10, 13, 59)
+                        )
                 ),
                 Arguments.of(
-                        LocalDateTime.of(2025, 10, 10, 23, 59),
-                        LocalDateTime.of(2025, 10, 10, 0, 0)
+                        new StayPeriod(
+                                LocalDateTime.of(2025, 10, 10, 23, 59),
+                                LocalDateTime.of(2025, 10, 10, 0, 0)
+                        )
                 )
         );
     }
@@ -111,20 +119,28 @@ public class ReservationTest {
     static Stream<Arguments> pastDatesProvider() {
         return Stream.of(
                 Arguments.of(
-                        LocalDateTime.now().minusDays(1),
-                        LocalDateTime.now().plusDays(1)
+                        new StayPeriod(
+                                LocalDateTime.now().minusDays(1),
+                                LocalDateTime.now().plusDays(1)
+                        )
                 ),
                 Arguments.of(
-                        LocalDateTime.now().minusHours(1),
-                        LocalDateTime.now().plusHours(5)
+                        new StayPeriod(
+                                LocalDateTime.now().minusHours(1),
+                                LocalDateTime.now().plusHours(5)
+                        )
                 ),
                 Arguments.of(
-                        LocalDateTime.now().minusMinutes(1),
-                        LocalDateTime.now().plusDays(2)
+                        new StayPeriod(
+                                LocalDateTime.now().minusMinutes(1),
+                                LocalDateTime.now().plusDays(2)
+                        )
                 ),
                 Arguments.of(
-                        LocalDateTime.now().minusDays(2),
-                        LocalDateTime.now().minusDays(1)
+                        new StayPeriod(
+                                LocalDateTime.now().minusDays(2),
+                                LocalDateTime.now().minusDays(1)
+                        )
                 )
         );
     }
@@ -148,58 +164,58 @@ public class ReservationTest {
     @MethodSource("reservationProvider")
     @Tag("UnitTest")
     @Tag("TDD")
-    void shouldCreateReservation(Room room, Guest guest, LocalDateTime checkIn, LocalDateTime checkOut) {
-        Reservation obtained = sut.createReservation(room, guest, checkIn, checkOut);
+    void shouldCreateReservation(Room room, Guest guest, StayPeriod stayPeriod) {
+        Reservation obtained = sut.createReservation(room, guest, stayPeriod);
 
         assertThat(obtained).isNotNull();
         assertThat(sut.getAllReservations()).isNotEmpty();
         assertThat(obtained.getGuest().getName()).isEqualTo(guest.getName());
         assertThat(obtained.getRoom().getId()).isEqualTo(room.getId());
-        assertThat(obtained.getRoom().getStatus()).isEqualTo(Status.RESERVED);
+        assertThat(obtained.getStatus()).isEqualTo(ReservationStatus.ACTIVE);
     }
 
     @ParameterizedTest(name = "[{index}] Overlap: {0} - {1} with {2} - {3}")
     @Tag("UnitTest")
     @Tag("TDD")
     @MethodSource(value = "reservationConflictProvider")
-    void shouldNotAllowOverlappingReservationsForSameRoom(LocalDateTime firstCheckIn, LocalDateTime firstCheckOut, LocalDateTime secondCheckInOverLaped, LocalDateTime secondCheckOutOverLaped) {
+    void shouldNotAllowOverlappingReservationsForSameRoom(StayPeriod firsStayPeriod, StayPeriod secondStayPeriod) {
         Room room102 = new Room("102", Status.AVAILABLE, 200.0);
         Guest guest1 = new Guest("Marcos", 35, "30639680054");
         Guest guest2 = new Guest("Fernanda", 29, "15495812018");
 
-        sut.createReservation(room102, guest1, firstCheckIn, firstCheckOut);
+        sut.createReservation(room102, guest1, firsStayPeriod);
 
         assertThatThrownBy(() ->
-                sut.createReservation(room102, guest2, secondCheckInOverLaped, secondCheckOutOverLaped))
+                sut.createReservation(room102, guest2, secondStayPeriod))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("not available");
     }
 
-    @ParameterizedTest(name = "[{index}] checkIn={0}, checkOut={1} - INVALID")
+    @ParameterizedTest(name = "[{index}] {0} - INVALID")
     @MethodSource("invalidDatesProvider")
     @Tag("UnitTest")
     @Tag("TDD")
-    void shouldNotAllowReservationWhenCheckInIsAfterOrEqualToCheckOut(LocalDateTime invalidCheckIn, LocalDateTime invalidCheckOut) {
+    void shouldNotAllowReservationWhenCheckInIsAfterOrEqualToCheckOut(StayPeriod invalidStayPeriod) {
         Room room = new Room("201", Status.AVAILABLE, 150.0);
         Guest guest = new Guest("João", 25, "85856073002");
 
         assertThatThrownBy(() ->
-                sut.createReservation(room, guest, invalidCheckIn, invalidCheckOut)
+                sut.createReservation(room, guest, invalidStayPeriod)
         )
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Check-in date must be before check-out date");
     }
 
-    @ParameterizedTest(name = "[{index}] Past reservation invalid → checkIn={0}, checkOut={1}")
+    @ParameterizedTest(name = "[{index}] Past reservation invalid → {0}")
     @MethodSource(value = "pastDatesProvider")
     @Tag("UnitTest")
     @Tag("TDD")
-    void shouldNotAllowReservationWithPastDates(LocalDateTime pastCheckIn, LocalDateTime pastCheckOut) {
-        Room room = new Room("301", Status.AVAILABLE, 180.0);
+    void shouldNotAllowReservationWithPastDates(StayPeriod pastStayPeriod) {
+        Room room = new Room("301", Status.AVAILABLE,180.0);
         Guest guest = new Guest("Clara", 27, "41237267048");
 
         assertThatThrownBy(() ->
-                sut.createReservation(room, guest, pastCheckIn, pastCheckOut)
+                sut.createReservation(room, guest, pastStayPeriod)
         )
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Reservation dates must be in the future");
@@ -210,11 +226,11 @@ public class ReservationTest {
     @Tag("TDD")
     void shouldNotAllowReservationForNonExistingRoom() {
         Guest guest = new Guest("Lucas", 27, "25971503057");
-        LocalDateTime checkIn = LocalDateTime.of(2025, 11, 20, 14, 0);
-        LocalDateTime checkOut = LocalDateTime.of(2025, 11, 22, 11, 0);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 11, 20, 14, 0),
+                LocalDateTime.of(2025, 11, 22, 11, 0));
 
         assertThatThrownBy(() ->
-                sut.createReservation(null, guest, checkIn, checkOut)
+                sut.createReservation(null, guest, stayPeriod)
         )
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Room does not exist");
@@ -227,11 +243,11 @@ public class ReservationTest {
     void shouldNotAllowReservationForRoomUnderMaintenance() {
         Room roomInMaintenance = new Room("401", Status.UNDER_MAINTENANCE, 300.0);
         Guest guest = new Guest("Julia", 32, "61708839011");
-        LocalDateTime checkIn = LocalDateTime.of(2025, 12, 1, 14, 0);
-        LocalDateTime checkOut = LocalDateTime.of(2025, 12, 3, 11, 0);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 1, 14, 0),
+                LocalDateTime.of(2025, 12, 3, 11, 0));
 
         assertThatThrownBy(() ->
-                sut.createReservation(roomInMaintenance, guest, checkIn, checkOut)
+                sut.createReservation(roomInMaintenance, guest, stayPeriod)
         )
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Room is under maintenance");
@@ -248,15 +264,15 @@ public class ReservationTest {
         Room room = new Room("301", Status.AVAILABLE, 180.0);
         Guest guest = new Guest("Test Guest", age, "19663936010");
 
-        LocalDateTime checkIn = LocalDateTime.of(2025, 12, 12, 14, 0);
-        LocalDateTime checkOut = LocalDateTime.of(2025, 12, 13, 11, 0);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 12, 14, 0),
+                    LocalDateTime.of(2025, 12, 13, 11, 0));
 
         if (shouldSucceed) {
-            Reservation reservation = sut.createReservation(room, guest, checkIn, checkOut);
+            Reservation reservation = sut.createReservation(room, guest, stayPeriod);
             assertThat(reservation).isNotNull();
             assertThat(reservation.getGuest().getAge()).isGreaterThanOrEqualTo(18);
         } else {
-            assertThatThrownBy(() -> sut.createReservation(room, guest, checkIn, checkOut))
+            assertThatThrownBy(() -> sut.createReservation(room, guest, stayPeriod))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("at least 18 years old");
         }
@@ -270,8 +286,8 @@ public class ReservationTest {
 
         assertThatThrownBy(() ->
                 sut.createReservation(room, null,
-                        LocalDateTime.of(2025, 12, 1, 14, 0),
-                        LocalDateTime.of(2025, 12, 5, 11, 0))
+                        new StayPeriod(LocalDateTime.of(2025, 12, 1, 14, 0),
+                        LocalDateTime.of(2025, 12, 5, 11, 0)))
         )
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Guest must not be null");
@@ -283,14 +299,12 @@ public class ReservationTest {
     @Tag("TDD")
     void shouldNotAllowReservationWithInvalidGuestData(String name, Integer age, String cpf) {
         Room room = new Room("101", Status.AVAILABLE, 250.0);
-
         Guest invalidGuest = new Guest(name, age, cpf);
-
-        LocalDateTime checkIn = LocalDateTime.of(2025, 10, 6, 14, 0);
-        LocalDateTime checkOut = LocalDateTime.of(2025, 10, 8, 11, 0);
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
+                LocalDateTime.of(2025, 10, 8, 11, 0));
 
         assertThatThrownBy(() ->
-                sut.createReservation(room, invalidGuest, checkIn, checkOut)
+                sut.createReservation(room, invalidGuest, stayPeriod)
         )
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Guest must provide valid CPF, name and age");
