@@ -6,6 +6,7 @@ import br.ifsp.demo.service.ReservationService;
 import net.bytebuddy.asm.MemberSubstitution;
 import org.codehaus.plexus.util.cli.Arg;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -309,6 +310,24 @@ public class ReservationTest {
         )
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Guest must provide valid CPF, name and age");
+    }
+
+    @Test
+    @DisplayName("Should be possible to add a extra service in an active Reservation")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldBePossibleToAddAExtraServiceInAnActiveReservation(){
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Lucas", 38, "78609833038");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
+                LocalDateTime.of(2025, 10, 8, 11, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+
+        ExtraService extraService = new ExtraService("Laundry", 30.0);
+        assertThat(sut.addExtraService(reservation.getId(), extraService).getExtraService)
+                .isNotEmpty()
+                .contains(extraService)
+                .doesNotContainNull();
     }
 
 
