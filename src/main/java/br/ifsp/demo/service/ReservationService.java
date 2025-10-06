@@ -4,10 +4,7 @@ import br.ifsp.demo.domain.*;
 import br.ifsp.demo.repository.ReservationRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class ReservationService {
 
@@ -84,6 +81,9 @@ public class ReservationService {
 
     public Reservation addExtraService(String reservationId, ExtraService service){
         Optional<Reservation> reservation = reservationRepository.findById(reservationId);
+
+        if (reservation.isEmpty()) throw new NoSuchElementException("Reservation not found for id: " + reservationId);
+
         reservation.get().appendExtraService(service);
         reservationRepository.update(reservation.get());
         return reservation.get();
