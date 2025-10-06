@@ -33,19 +33,19 @@ public class ReservationTest {
                 Arguments.of(
                         new Room("101", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Maria", 30, "78609833038"),
-                        new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
-                                LocalDateTime.of(2025, 10, 7, 11, 0))
+                        new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                                LocalDateTime.now().plusDays(2).withHour(11).withMinute(0))
                 ),
                 Arguments.of(
                         new Room("102", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Pedro", 30, "75352394042"),
-                        new StayPeriod(LocalDateTime.of(2025, 10, 15, 14, 0),
-                                LocalDateTime.of(2025, 10, 16, 11, 0))
+                        new StayPeriod(LocalDateTime.now().plusDays(2).withHour(14).withMinute(0),
+                                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0))
                 ), Arguments.of(
                         new Room("102", RoomStatus.AVAILABLE, 250.0),
                         new Guest("Pedro", 30, "00356457095"),
-                        new StayPeriod(LocalDateTime.of(2025, 10, 16, 12, 0),
-                                LocalDateTime.of(2025, 10, 18, 11, 0))
+                        new StayPeriod(LocalDateTime.now().plusDays(3).withHour(12).withMinute(0),
+                                LocalDateTime.now().plusDays(5).withHour(11).withMinute(0))
                 )
         );
     }
@@ -272,8 +272,8 @@ public class ReservationTest {
     void shouldBePossibleToAddAExtraServiceInAnActiveReservation(){
         Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest guest = new Guest("Lucas", 38, "78609833038");
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
-                LocalDateTime.of(2025, 10, 8, 11, 0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
         Reservation reservation = sut.createReservation(room, guest, stayPeriod);
 
         ExtraService extraService = new ExtraService("Laundry", 30.0);
@@ -302,8 +302,8 @@ public class ReservationTest {
         // Arrange
         Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest vipGuest = new Guest("VIP Guest", 30, "78609833038", true);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
-                LocalDateTime.of(2025, 10, 8, 11, 0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
 
         // Act
@@ -322,8 +322,8 @@ public class ReservationTest {
         // Arrange
         Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest regularGuest = new Guest("Regular Guest", 30, "78609833038", false);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 10, 6, 14, 0),
-                LocalDateTime.of(2025, 10, 8, 11, 0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
         Reservation reservation = sut.createReservation(room, regularGuest, stayPeriod);
 
         // Act

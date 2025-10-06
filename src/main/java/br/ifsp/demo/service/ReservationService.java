@@ -88,4 +88,32 @@ public class ReservationService {
         reservationRepository.update(reservation);
         return reservation;
     }
+
+    public double checkout(String reservationId) {
+        Optional<Reservation> reservationOpt = reservationRepository.findById(reservationId);
+        if (reservationOpt.isEmpty()) {
+            throw new IllegalArgumentException("Reservation not found");
+        }
+        
+        Reservation reservation = reservationOpt.get();
+        
+        long nights = java.time.temporal.ChronoUnit.DAYS.between(
+            reservation.getStayPeriod().getCheckin().toLocalDate(),
+            reservation.getStayPeriod().getCheckout().toLocalDate()
+        );
+        
+        double baseAmount = reservation.getRoom().getPrice() * nights;
+        
+        double extraServicesAmount = reservation.getExtraServices().stream()
+            .mapToDouble(ExtraService::getValue)
+            .sum();
+        
+        double totalAmount = baseAmount + extraServicesAmount;
+        
+        if (reservation.getGuest().isVip()) {
+            totalAmount = totalAmount * 0.85; // 15% discount
+        }
+        
+        return totalAmount;
+    }
 }
