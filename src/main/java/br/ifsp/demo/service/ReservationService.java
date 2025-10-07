@@ -78,6 +78,11 @@ public class ReservationService {
         }
     }
 
+    private void validateReservationActiveState(Reservation reservation){
+        if(reservation.getReservationStatus() != ReservationStatus.ACTIVE)
+            throw new IllegalStateException("Reservation must be Active");
+    }
+
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
     }
@@ -127,9 +132,11 @@ public class ReservationService {
 
     public Reservation updateStayPeriod(String reservationId, StayPeriod newStayPeriod){
         validateStayPeriod(newStayPeriod);
-
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
+
+        validateReservationActiveState(reservation);
+
         reservation.setStayPeriod(newStayPeriod);
         reservationRepository.update(reservation);
 
