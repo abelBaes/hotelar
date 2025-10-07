@@ -284,8 +284,8 @@ public class ReservationTest {
     void shouldBePossibleToAddAExtraServiceInAnActiveReservation(){
         Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest guest = new Guest("Lucas", 38, "78609833038");
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 15, 11, 0));
         Reservation reservation = sut.createReservation(room, guest, stayPeriod);
 
         ExtraService extraService = new ExtraService("Laundry", 30.0);
@@ -313,11 +313,11 @@ public class ReservationTest {
     void shouldApplyFifteenPercentDiscountForVipGuestDuringCheckout() {
         Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest vipGuest = new Guest("VIP Guest", 30, "78609833038", true);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 15, 11, 0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
 
-        double totalAmount = sut.checkout(reservation.getId());
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 15, 11, 0));
 
         // 2 nights * 250.0 = 500.0, com desconto de 15% = 425.0
         assertThat(totalAmount).isEqualTo(425.0);
@@ -330,11 +330,11 @@ public class ReservationTest {
     void shouldNotApplyDiscountForNonVipGuestDuringCheckout() {
         Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
         Guest regularGuest = new Guest("Regular Guest", 30, "78609833038", false);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 15, 11, 0));
         Reservation reservation = sut.createReservation(room, regularGuest, stayPeriod);
 
-        double totalAmount = sut.checkout(reservation.getId());
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 15, 11, 0));
 
         // 2 nights * 250.0 = 500.0, sem desconto = 500.0
         assertThat(totalAmount).isEqualTo(500.0);
@@ -346,7 +346,7 @@ public class ReservationTest {
     @Tag("Functional")
     void shouldThrowExceptionWhenCheckoutWithNonExistentReservationId() {
         String nonExistentId = "non-existent-id";
-        assertThatThrownBy(() -> sut.checkout(nonExistentId))
+        assertThatThrownBy(() -> sut.checkout(nonExistentId, LocalDateTime.of(2025, 12, 15, 11, 0)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Reservation not found");
     }
@@ -356,7 +356,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("Functional")
     void shouldThrowExceptionWhenCheckoutWithNullReservationId() {
-        assertThatThrownBy(() -> sut.checkout(null))
+        assertThatThrownBy(() -> sut.checkout(null, LocalDateTime.of(2025, 12, 15, 11, 0)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Reservation not found");
     }
@@ -366,7 +366,7 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("Functional")
     void shouldThrowExceptionWhenCheckoutWithEmptyReservationId() {
-        assertThatThrownBy(() -> sut.checkout(""))
+        assertThatThrownBy(() -> sut.checkout("", LocalDateTime.of(2025, 12, 15, 11, 0)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Reservation not found");
     }
@@ -378,11 +378,11 @@ public class ReservationTest {
     void shouldApplyCorrectVipDiscountForSingleNightStay() {
         Room room = new Room("102", RoomStatus.AVAILABLE, 300.0);
         Guest vipGuest = new Guest("VIP Guest", 35, "12345678901", true);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(2).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 14, 11, 0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
 
-        double totalAmount = sut.checkout(reservation.getId());
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
 
         // 1 night * 300.0 = 300.0, com desconto de 15% = 255.0
         assertThat(totalAmount).isEqualTo(255.0);
@@ -395,11 +395,11 @@ public class ReservationTest {
     void shouldApplyCorrectVipDiscountForLongStay() {
         Room room = new Room("103", RoomStatus.AVAILABLE, 200.0);
         Guest vipGuest = new Guest("VIP Guest", 40, "98765432100", true);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(8).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 20, 11, 0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
 
-        double totalAmount = sut.checkout(reservation.getId());
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
 
         // 7 nights * 200.0 = 1400.0, com desconto de 15% = 1190.0
         assertThat(totalAmount).isEqualTo(1190.0);
@@ -412,8 +412,8 @@ public class ReservationTest {
     void shouldApplyVipDiscountWithExtraServices() {
         Room room = new Room("104", RoomStatus.AVAILABLE, 150.0);
         Guest vipGuest = new Guest("VIP Guest", 25, "11122233344", true);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(3).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 15, 11, 0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
         
         ExtraService wifi = new ExtraService("WiFi", 50.0);
@@ -421,7 +421,7 @@ public class ReservationTest {
         sut.addExtraService(reservation.getId(), wifi);
         sut.addExtraService(reservation.getId(), breakfast);
 
-        double totalAmount = sut.checkout(reservation.getId());
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
 
         // (2 nights * 150.0 + 50.0 + 30.0) * 0.85 = (300.0 + 80.0) * 0.85 = 323.0
         assertThat(totalAmount).isEqualTo(323.0);
@@ -434,14 +434,14 @@ public class ReservationTest {
     void shouldNotApplyDiscountForNonVipGuestWithExtraServices() {
         Room room = new Room("105", RoomStatus.AVAILABLE, 180.0);
         Guest regularGuest = new Guest("Regular Guest", 28, "55566677788", false);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(4).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 16, 11, 0));
         Reservation reservation = sut.createReservation(room, regularGuest, stayPeriod);
         
         ExtraService spa = new ExtraService("Spa", 100.0);
         sut.addExtraService(reservation.getId(), spa);
 
-        double totalAmount = sut.checkout(reservation.getId());
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
 
         // 3 nights * 180.0 + 100.0 = 540.0 + 100.0 = 640.0 (sem desconto)
         assertThat(totalAmount).isEqualTo(640.0);
@@ -454,11 +454,11 @@ public class ReservationTest {
     void shouldHandleZeroPriceRoomCorrectlyForVipGuest() {
         Room room = new Room("106", RoomStatus.AVAILABLE, 0.0);
         Guest vipGuest = new Guest("VIP Guest", 30, "99988877766", true);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(2).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 14, 11, 0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
 
-        double totalAmount = sut.checkout(reservation.getId());
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
 
         // 1 night * 0.0 = 0.0, com desconto de 15% = 0.0
         assertThat(totalAmount).isEqualTo(0.0);
@@ -471,11 +471,11 @@ public class ReservationTest {
     void shouldHandleHighPriceRoomCorrectlyForVipGuest() {
         Room room = new Room("107", RoomStatus.AVAILABLE, 10000.0);
         Guest vipGuest = new Guest("VIP Guest", 45, "44455566677", true);
-        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-                LocalDateTime.now().plusDays(2).withHour(11).withMinute(0));
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
+                LocalDateTime.of(2025, 12, 14, 11, 0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
 
-        double totalAmount = sut.checkout(reservation.getId());
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
 
         // 1 night * 10000.0 = 10000.0, com desconto de 15% = 8500.0
         assertThat(totalAmount).isEqualTo(8500.0);
