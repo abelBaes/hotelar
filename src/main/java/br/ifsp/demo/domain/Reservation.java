@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Reservation {
 
@@ -47,4 +48,13 @@ public class Reservation {
     public void setStayPeriod(StayPeriod stayPeriod) {
         this.stayPeriod = stayPeriod;
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Reservation that = (Reservation) object;
+        return Objects.equals(id, that.id);
+    }
+    
 }

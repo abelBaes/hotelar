@@ -83,6 +83,19 @@ public class ReservationService {
             throw new IllegalStateException("Reservation must be Active");
     }
 
+    private void validateUpdateAvailability(Room room, StayPeriod stayPeriod, Reservation reservation) {
+
+        for (Reservation savedReservation : reservationRepository.findAll()) {
+            if (savedReservation.getRoom().getId().equals(room.getId()) && !reservation.equals(savedReservation)) {
+                boolean overlap = stayPeriod.getCheckin().isBefore(savedReservation.getStayPeriod().getCheckout())
+                        && stayPeriod.getCheckout().isAfter(savedReservation.getStayPeriod().getCheckin());
+                if (overlap) {
+                    throw new IllegalStateException("Room " + room.getId() + " not available for the selected period");
+                }
+            }
+        }
+    }
+
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
     }
@@ -184,7 +197,7 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
 
         validateReservationActiveState(reservation);
-        validateAvailability(reservation.getRoom(), newStayPeriod);
+        validateUpdateAvailability(reservation.getRoom(), newStayPeriod, reservation);
 
         reservation.setStayPeriod(newStayPeriod);
         reservationRepository.update(reservation);
