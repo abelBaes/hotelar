@@ -575,4 +575,24 @@ public class ReservationTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Reservation must be Active");
     }
+
+    @ParameterizedTest(name = "Should not be possible to change the Stay Period to a non avaible one.")
+    @MethodSource("reservationConflictProvider")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotBePossibleToChangeTheStayPeriodToANonAvaibleOne(StayPeriod alreadyExistentStayPeriod, StayPeriod newStayPeriod){
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest1 = new Guest("Lucas", 38, "78609833038");
+        Guest guest2 = new Guest("Fernanda", 29, "15495812018");
+        StayPeriod avaybleStayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 10, 14, 0),
+                LocalDateTime.of(2025, 12, 15, 12, 0));
+
+        sut.createReservation(room,guest1,alreadyExistentStayPeriod);
+        Reservation reservationToBeChanged = sut.createReservation(room,guest2,avaybleStayPeriod);
+
+        assertThatThrownBy(() ->
+                sut.updateStayPeriod(reservationToBeChanged.getId(), newStayPeriod))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("not available");
+    }
 }
