@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -26,15 +27,13 @@ import static org.mockito.Mockito.when;
 
 public class ReservationTest {
 
-    @Mock
     ReservationRepository fakeRepository;
-
-    @InjectMocks
     ReservationService sut;
 
     @BeforeEach
     void setup() {
-        sut = new ReservationService(new FakeReservationRepository());
+        fakeRepository = new FakeReservationRepository();
+        sut = new ReservationService(fakeRepository);
     }
 
     static Stream<Arguments> reservationProvider() {
@@ -575,7 +574,7 @@ public class ReservationTest {
         StayPeriod newStayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
                 LocalDateTime.of(2025, 9, 10, 0, 0));
 
-        when(fakeRepository.findById(reservationId)).thenReturn(Optional.of(new Reservation("H-20251005223045384920", room, guest, stayPeriod, status)));
+        fakeRepository.save(new Reservation(reservationId, room, guest, stayPeriod, status));
 
         assertThatThrownBy(() -> sut.updateStayPeriod(reservationId, newStayPeriod))
                 .isInstanceOf(IllegalStateException.class)
