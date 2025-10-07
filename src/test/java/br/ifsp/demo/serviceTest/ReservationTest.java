@@ -537,4 +537,18 @@ public class ReservationTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Check-in date must be before check-out date");
     }
+
+    @Test
+    @DisplayName("Should not be possible to change a non existent Reservation.")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotBePossibleToChangeANonExistentReservation(){
+        String nonExistentReservationId = "H-20251005223045384920";
+        StayPeriod newStayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
+                LocalDateTime.of(2025, 9, 10, 0, 0));
+
+        assertThatThrownBy(() -> sut.updateStayPeriod(nonExistentReservationId, newStayPeriod))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Reservation not found");
+    }
 }
