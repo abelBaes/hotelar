@@ -399,7 +399,7 @@ public class ReservationTest {
                 LocalDateTime.of(2025, 12, 20, 11, 0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
 
-        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 20, 11, 0));
 
         // 7 nights * 200.0 = 1400.0, com desconto de 15% = 1190.0
         assertThat(totalAmount).isEqualTo(1190.0);
@@ -421,7 +421,7 @@ public class ReservationTest {
         sut.addExtraService(reservation.getId(), wifi);
         sut.addExtraService(reservation.getId(), breakfast);
 
-        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 15, 11, 0));
 
         // (2 nights * 150.0 + 50.0 + 30.0) * 0.85 = (300.0 + 80.0) * 0.85 = 323.0
         assertThat(totalAmount).isEqualTo(323.0);
@@ -441,7 +441,7 @@ public class ReservationTest {
         ExtraService spa = new ExtraService("Spa", 100.0);
         sut.addExtraService(reservation.getId(), spa);
 
-        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 14, 11, 0));
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 16, 11, 0));
 
         // 3 nights * 180.0 + 100.0 = 540.0 + 100.0 = 640.0 (sem desconto)
         assertThat(totalAmount).isEqualTo(640.0);
@@ -594,5 +594,155 @@ public class ReservationTest {
                 sut.updateStayPeriod(reservationToBeChanged.getId(), newStayPeriod))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("not available");
+    }
+
+    static Stream<Arguments> invalidCheckoutStatusProvider() {
+        return Stream.of(
+                Arguments.of(ReservationStatus.FINALIZED),
+                Arguments.of(ReservationStatus.CANCELED)
+        );
+    }
+
+    static Stream<Arguments> invalidCheckoutDateProvider() {
+        return Stream.of(
+                Arguments.of(LocalDateTime.of(2024, 12, 10, 11, 0)), // Past date
+                Arguments.of(LocalDateTime.of(2024, 12, 14, 10, 0))  // Past date
+        );
+    }
+
+    @Test
+    @DisplayName("Should not be possible to checkout a finalized reservation")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotBePossibleToCheckoutFinalizedReservation() {
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Lucas", 38, "78609833038");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 16, 14, 0),
+                LocalDateTime.of(2025, 12, 18, 11, 0));
+        
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+        
+        sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 17, 11, 0));
+        
+        assertThatThrownBy(() -> sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 17, 11, 0)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Only active reservations can be checked out");
+    }
+
+    @Test
+    @DisplayName("Should finalize reservation after successful checkout")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldFinalizeReservationAfterSuccessfulCheckout() {
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Lucas", 38, "78609833038");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 16, 14, 0),
+                LocalDateTime.of(2025, 12, 18, 11, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+
+        double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 17, 11, 0));
+
+        assertThat(totalAmount).isEqualTo(250.0); // 1 night * 250.0
+        
+        Reservation updatedReservation = sut.getAllReservations().stream()
+                .filter(r -> r.getId().equals(reservation.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(updatedReservation.getReservationStatus()).isEqualTo(ReservationStatus.FINALIZED);
+    }
+
+    @Test
+    @DisplayName("Should not be possible to checkout the same reservation twice")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldNotBePossibleToCheckoutTheSameReservationTwice() {
+        Room room = new Room("102", RoomStatus.AVAILABLE, 200.0);
+        Guest guest = new Guest("Maria", 30, "12345678901");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 16, 14, 0),
+                LocalDateTime.of(2025, 12, 17, 11, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+
+        double firstCheckout = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 17, 11, 0));
+        assertThat(firstCheckout).isEqualTo(200.0);
+
+        assertThatThrownBy(() -> sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 16, 11, 0)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Only active reservations can be checked out");
+    }
+
+    @Test
+    @DisplayName("Should not be possible to add extra services to finalized reservation")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldNotBePossibleToAddExtraServicesToFinalizedReservation() {
+        Room room = new Room("103", RoomStatus.AVAILABLE, 300.0);
+        Guest guest = new Guest("João", 35, "98765432100");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 16, 14, 0),
+                LocalDateTime.of(2025, 12, 17, 11, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+
+        sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 16, 11, 0));
+
+        ExtraService extraService = new ExtraService("Room Service", 50.0);
+        assertThatThrownBy(() -> sut.addExtraService(reservation.getId(), extraService))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot add services to finalized or canceled reservations");
+    }
+
+    @DisplayName("Should not be possible to checkout with date in the past")
+    @ParameterizedTest(name = "[{index}] Past date: {0}")
+    @MethodSource("invalidCheckoutDateProvider")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotBePossibleToCheckoutWithDateInThePast(LocalDateTime pastDate) {
+        Room room = new Room("105", RoomStatus.AVAILABLE, 200.0);
+        Guest guest = new Guest("Carlos", 32, "12345678901");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 16, 14, 0),
+                LocalDateTime.of(2025, 12, 18, 11, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+
+        assertThatThrownBy(() -> sut.checkout(reservation.getId(), pastDate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Checkout date cannot be in the past");
+    }
+
+    @Test
+    @DisplayName("Should allow early checkout (before scheduled checkout date)")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldAllowEarlyCheckout() {
+        Room room = new Room("106", RoomStatus.AVAILABLE, 300.0);
+        Guest guest = new Guest("Early Guest", 28, "98765432100");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 16, 14, 0),
+                LocalDateTime.of(2025, 12, 20, 11, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+
+        // Early checkout (2 days before scheduled)
+        LocalDateTime earlyCheckoutDate = LocalDateTime.of(2025, 12, 18, 10, 0);
+        double totalAmount = sut.checkout(reservation.getId(), earlyCheckoutDate);
+
+        assertThat(totalAmount).isEqualTo(600.0); // 2 nights * 300.0
+        
+        Reservation updatedReservation = sut.getAllReservations().stream()
+                .filter(r -> r.getId().equals(reservation.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(updatedReservation.getReservationStatus()).isEqualTo(ReservationStatus.FINALIZED);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when checkout with null date")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldThrowExceptionWhenCheckoutWithNullDate() {
+        Room room = new Room("107", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Test Guest", 30, "11122233344");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 16, 14, 0),
+                LocalDateTime.of(2025, 12, 17, 11, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+
+        assertThatThrownBy(() -> sut.checkout(reservation.getId(), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Checkout date cannot be null");
     }
 }
