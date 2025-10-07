@@ -136,6 +136,7 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
 
         validateReservationActiveState(reservation);
+        validateAvailability(reservation.getRoom(), newStayPeriod);
 
         reservation.setStayPeriod(newStayPeriod);
         reservationRepository.update(reservation);
