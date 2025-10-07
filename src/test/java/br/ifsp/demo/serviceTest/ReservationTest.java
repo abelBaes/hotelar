@@ -2,6 +2,7 @@ package br.ifsp.demo.serviceTest;
 
 import br.ifsp.demo.domain.*;
 import br.ifsp.demo.repository.FakeReservationRepository;
+import br.ifsp.demo.repository.ReservationRepository;
 import br.ifsp.demo.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,17 +12,25 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 public class ReservationTest {
 
-    private ReservationService sut;
+    @Mock
+    ReservationRepository fakeRepository;
+
+    @InjectMocks
+    ReservationService sut;
 
     @BeforeEach
     void setup() {
@@ -550,5 +559,26 @@ public class ReservationTest {
         assertThatThrownBy(() -> sut.updateStayPeriod(nonExistentReservationId, newStayPeriod))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("Reservation not found for id: H-20251005223045384920");
+    }
+
+    @ParameterizedTest(name = "Should not be possible to change a non Active Reservation.")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    @CsvSource({"FINALIZED", "CANCELED"})
+    void shouldNotBePossibleToChangeANonActiveReservation(ReservationStatus status){
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Lucas", 38, "78609833038");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
+                LocalDateTime.of(2025, 10, 10, 0, 0));
+        String reservationId = "H-20251005223045384920";
+
+        StayPeriod newStayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
+                LocalDateTime.of(2025, 9, 10, 0, 0));
+
+        when(fakeRepository.findById(reservationId)).thenReturn(Optional.of(new Reservation("H-20251005223045384920", room, guest, stayPeriod, status)));
+
+        assertThatThrownBy(() -> sut.updateStayPeriod(reservationId, newStayPeriod))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Reservation must be Active");
     }
 }
