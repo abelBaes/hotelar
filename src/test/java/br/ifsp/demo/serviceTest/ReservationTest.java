@@ -548,7 +548,7 @@ public class ReservationTest {
                 LocalDateTime.of(2025, 9, 10, 0, 0));
 
         assertThatThrownBy(() -> sut.updateStayPeriod(nonExistentReservationId, newStayPeriod))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Reservation not found");
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("Reservation not found for id: H-20251005223045384920");
     }
 }
