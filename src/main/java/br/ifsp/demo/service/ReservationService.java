@@ -92,27 +92,37 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
 
+        validateReservationStatusForExtraService(reservation);
+        
         reservation.appendExtraService(service);
         reservationRepository.update(reservation);
         return reservation;
     }
 
-    public double checkout(String reservationId) {
+    public double checkout(String reservationId, LocalDateTime checkoutDate) {
+        validateCheckoutDate(checkoutDate);
+        
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
         
-        long nights = calculateNights(reservation.getStayPeriod());
+        validateReservationStatusForCheckout(reservation);
+        
+        long nights = calculateNights(reservation.getStayPeriod(), checkoutDate);
         double baseAmount = calculateBaseAmount(reservation.getRoom(), nights);
         double extraServicesAmount = calculateExtraServicesAmount(reservation.getExtraServices());
         double totalAmount = baseAmount + extraServicesAmount;
         
-        return applyVipDiscount(totalAmount, reservation.getGuest().isVip());
+        double finalAmount = applyVipDiscount(totalAmount, reservation.getGuest().isVip());
+        
+        finalizeReservation(reservation);
+        
+        return finalAmount;
     }
     
-    private long calculateNights(StayPeriod stayPeriod) {
+    private long calculateNights(StayPeriod stayPeriod, LocalDateTime checkoutDate) {
         return ChronoUnit.DAYS.between(
             stayPeriod.getCheckin().toLocalDate(),
-            stayPeriod.getCheckout().toLocalDate()
+            checkoutDate.toLocalDate()
         );
     }
     
@@ -128,6 +138,44 @@ public class ReservationService {
     
     private double applyVipDiscount(double totalAmount, boolean isVip) {
         return isVip ? totalAmount * VIP_DISCOUNT_RATE : totalAmount;
+    }
+    
+    private void validateCheckoutDate(LocalDateTime checkoutDate) {
+        if (checkoutDate == null) {
+            throw new IllegalArgumentException("Checkout date cannot be null");
+        }
+        
+        if (checkoutDate.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Checkout date cannot be in the past");
+        }
+    }
+    
+    private void validateReservationStatusForCheckout(Reservation reservation) {
+        if (reservation.getReservationStatus() != ReservationStatus.ACTIVE) {
+            throw new IllegalStateException("Only active reservations can be checked out");
+        }
+    }
+    
+    private void validateReservationStatusForExtraService(Reservation reservation) {
+        if (reservation.getReservationStatus() != ReservationStatus.ACTIVE) {
+            throw new IllegalStateException("Cannot add services to finalized or canceled reservations");
+        }
+    }
+    
+    private void finalizeReservation(Reservation reservation) {
+        Reservation finalizedReservation = new Reservation(
+            reservation.getId(),
+            reservation.getRoom(),
+            reservation.getGuest(),
+            reservation.getStayPeriod(),
+            ReservationStatus.FINALIZED
+        );
+        
+        for (ExtraService service : reservation.getExtraServices()) {
+            finalizedReservation.appendExtraService(service);
+        }
+        
+        reservationRepository.update(finalizedReservation);
     }
 
     public Reservation updateStayPeriod(String reservationId, StayPeriod newStayPeriod){
