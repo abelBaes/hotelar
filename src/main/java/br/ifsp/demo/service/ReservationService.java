@@ -128,7 +128,8 @@ public class ReservationService {
     public Reservation updateStayPeriod(String reservationId, StayPeriod newStayPeriod){
         validateStayPeriod(newStayPeriod);
 
-        Reservation reservation = reservationRepository.findById(reservationId).get();
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
         reservation.setStayPeriod(newStayPeriod);
         reservationRepository.update(reservation);
 
