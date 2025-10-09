@@ -1,6 +1,6 @@
-package br.ifsp.demo.service;
+package br.ifsp.demo.domain.service;
 
-import br.ifsp.demo.domain.*;
+import br.ifsp.demo.domain.model.*;
 import br.ifsp.demo.repository.ReservationRepository;
 
 import java.time.LocalDateTime;

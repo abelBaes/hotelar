@@ -1,24 +1,14 @@
-package br.ifsp.demo.serviceTest;
+package br.ifsp.demo.domain.serviceTest;
 
-import br.ifsp.demo.domain.*;
-import br.ifsp.demo.service.ReservationIDService;
-import br.ifsp.demo.service.ReservationService;
-import net.bytebuddy.asm.MemberSubstitution;
-import org.codehaus.plexus.util.cli.Arg;
-import org.junit.jupiter.api.BeforeEach;
+import br.ifsp.demo.domain.service.ReservationIDService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.enterprise.inject.Stereotype;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.stream.Stream;
-import static org.mockito.Mockito.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

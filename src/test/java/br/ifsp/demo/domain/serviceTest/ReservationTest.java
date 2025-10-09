@@ -1,9 +1,9 @@
-package br.ifsp.demo.serviceTest;
+package br.ifsp.demo.domain.serviceTest;
 
-import br.ifsp.demo.domain.*;
+import br.ifsp.demo.domain.model.*;
 import br.ifsp.demo.repository.FakeReservationRepository;
 import br.ifsp.demo.repository.ReservationRepository;
-import br.ifsp.demo.service.ReservationService;
+import br.ifsp.demo.domain.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;

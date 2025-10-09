@@ -1,11 +1,10 @@
 package br.ifsp.demo.repository;
 
-import br.ifsp.demo.domain.Reservation;
+import br.ifsp.demo.domain.model.Reservation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class FakeReservationRepository implements ReservationRepository {
     private final List<Reservation> reservations = new ArrayList<>();

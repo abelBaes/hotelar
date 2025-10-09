@@ -1,4 +1,4 @@
-package br.ifsp.demo.domain;
+package br.ifsp.demo.domain.model;
 
 public enum RoomStatus {
     AVAILABLE,

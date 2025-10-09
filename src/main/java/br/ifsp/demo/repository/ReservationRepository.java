@@ -1,7 +1,6 @@
 package br.ifsp.demo.repository;
 
-import br.ifsp.demo.domain.Reservation;
-import br.ifsp.demo.domain.ReservationStatus;
+import br.ifsp.demo.domain.model.Reservation;
 
 import java.util.List;
 import java.util.Optional;

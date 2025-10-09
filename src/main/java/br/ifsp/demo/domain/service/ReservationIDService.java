@@ -1,4 +1,4 @@
-package br.ifsp.demo.service;
+package br.ifsp.demo.domain.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
