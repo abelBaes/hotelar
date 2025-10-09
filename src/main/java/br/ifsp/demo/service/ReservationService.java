@@ -210,6 +210,8 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
 
+        validateReservationActiveState(reservation);
+
         reservation.setReservationStatus(ReservationStatus.CANCELED);
         reservationRepository.update(reservation);
 
