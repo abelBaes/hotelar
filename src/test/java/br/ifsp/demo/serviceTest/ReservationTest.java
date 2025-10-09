@@ -345,10 +345,10 @@ public class ReservationTest {
     @Tag("UnitTest")
     @Tag("Functional")
     void shouldThrowExceptionWhenCheckoutWithNonExistentReservationId() {
-        String nonExistentId = "non-existent-id";
+        String nonExistentId = "H-20251005223045384920";
         assertThatThrownBy(() -> sut.checkout(nonExistentId, LocalDateTime.of(2025, 12, 15, 11, 0)))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Reservation not found");
+            .isInstanceOf(NoSuchElementException.class)
+            .hasMessage("Reservation not found for id: H-20251005223045384920");
     }
 
     @Test
@@ -357,8 +357,8 @@ public class ReservationTest {
     @Tag("Functional")
     void shouldThrowExceptionWhenCheckoutWithNullReservationId() {
         assertThatThrownBy(() -> sut.checkout(null, LocalDateTime.of(2025, 12, 15, 11, 0)))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Reservation not found");
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("Reservation ID must not be null");
     }
 
     @Test
@@ -368,7 +368,7 @@ public class ReservationTest {
     void shouldThrowExceptionWhenCheckoutWithEmptyReservationId() {
         assertThatThrownBy(() -> sut.checkout("", LocalDateTime.of(2025, 12, 15, 11, 0)))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Reservation not found");
+            .hasMessage("Invalid Reservation ID format");
     }
 
     @Test

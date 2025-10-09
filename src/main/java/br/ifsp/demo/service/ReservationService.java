@@ -113,10 +113,11 @@ public class ReservationService {
     }
 
     public double checkout(String reservationId, LocalDateTime checkoutDate) {
+        ReservationIDService.validate(reservationId);
         validateCheckoutDate(checkoutDate);
         
         Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+            .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
         
         validateReservationStatusForCheckout(reservation);
         
@@ -192,6 +193,7 @@ public class ReservationService {
     }
 
     public Reservation updateStayPeriod(String reservationId, StayPeriod newStayPeriod){
+        ReservationIDService.validate(reservationId);
         validateStayPeriod(newStayPeriod);
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
@@ -206,7 +208,7 @@ public class ReservationService {
     }
 
     public Reservation cancelReservation(String reservationId){
-
+        ReservationIDService.validate(reservationId);
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
 
