@@ -204,4 +204,13 @@ public class ReservationService {
 
         return reservation;
     }
+
+    public Reservation cancelReservation(String reservationId){
+
+        Reservation reservation = reservationRepository.findById(reservationId).get();
+        reservation.setReservationStatus(ReservationStatus.CANCELED);
+        reservationRepository.update(reservation);
+
+        return reservation;
+    }
 }

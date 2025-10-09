@@ -12,7 +12,7 @@ public class Reservation {
     private final Room room;
     private final Guest guest;
     private StayPeriod stayPeriod;
-    private final ReservationStatus reservationStatus;
+    private ReservationStatus reservationStatus;
     private final List<ExtraService> extraServices = new ArrayList<>();
 
     public Reservation(String id, Room room, Guest guest, StayPeriod stayPeriod, ReservationStatus reservationStatus) {
@@ -48,6 +48,11 @@ public class Reservation {
     public void setStayPeriod(StayPeriod stayPeriod) {
         this.stayPeriod = stayPeriod;
     }
+
+    public void setReservationStatus(ReservationStatus status){
+        this.reservationStatus = status;
+    }
+
 
     @Override
     public boolean equals(Object object) {
