@@ -207,7 +207,9 @@ public class ReservationService {
 
     public Reservation cancelReservation(String reservationId){
 
-        Reservation reservation = reservationRepository.findById(reservationId).get();
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
+
         reservation.setReservationStatus(ReservationStatus.CANCELED);
         reservationRepository.update(reservation);
 
