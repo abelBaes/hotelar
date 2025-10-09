@@ -339,7 +339,7 @@ public class ReservationTest {
         // 2 nights * 250.0 = 500.0, sem desconto = 500.0
         assertThat(totalAmount).isEqualTo(500.0);
     }
-    
+
     @Test
     @DisplayName("Should throw exception when checkout with non-existent reservation ID")
     @Tag("UnitTest")
@@ -415,7 +415,7 @@ public class ReservationTest {
         StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
                 LocalDateTime.of(2025, 12, 15, 11, 0));
         Reservation reservation = sut.createReservation(room, vipGuest, stayPeriod);
-        
+
         ExtraService wifi = new ExtraService("WiFi", 50.0);
         ExtraService breakfast = new ExtraService("Breakfast", 30.0);
         sut.addExtraService(reservation.getId(), wifi);
@@ -437,7 +437,7 @@ public class ReservationTest {
         StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 13, 14, 0),
                 LocalDateTime.of(2025, 12, 16, 11, 0));
         Reservation reservation = sut.createReservation(room, regularGuest, stayPeriod);
-        
+
         ExtraService spa = new ExtraService("Spa", 100.0);
         sut.addExtraService(reservation.getId(), spa);
 
@@ -619,11 +619,11 @@ public class ReservationTest {
         Guest guest = new Guest("Lucas", 38, "78609833038");
         StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 12, 16, 14, 0),
                 LocalDateTime.of(2025, 12, 18, 11, 0));
-        
+
         Reservation reservation = sut.createReservation(room, guest, stayPeriod);
-        
+
         sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 17, 11, 0));
-        
+
         assertThatThrownBy(() -> sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 17, 11, 0)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Only active reservations can be checked out");
@@ -643,7 +643,7 @@ public class ReservationTest {
         double totalAmount = sut.checkout(reservation.getId(), LocalDateTime.of(2025, 12, 17, 11, 0));
 
         assertThat(totalAmount).isEqualTo(250.0); // 1 night * 250.0
-        
+
         Reservation updatedReservation = sut.getAllReservations().stream()
                 .filter(r -> r.getId().equals(reservation.getId()))
                 .findFirst()
@@ -722,7 +722,7 @@ public class ReservationTest {
         double totalAmount = sut.checkout(reservation.getId(), earlyCheckoutDate);
 
         assertThat(totalAmount).isEqualTo(600.0); // 2 nights * 300.0
-        
+
         Reservation updatedReservation = sut.getAllReservations().stream()
                 .filter(r -> r.getId().equals(reservation.getId()))
                 .findFirst()
@@ -744,5 +744,21 @@ public class ReservationTest {
         assertThatThrownBy(() -> sut.checkout(reservation.getId(), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Checkout date cannot be null");
+    }
+
+    @Test
+    @DisplayName("Should be possible to cancel a active reservation")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldBePossibleToCancelAActiveReservation(){
+        Room room = new Room("101", RoomStatus.AVAILABLE, 250.0);
+        Guest guest = new Guest("Lucas", 38, "78609833038");
+        StayPeriod stayPeriod = new StayPeriod(LocalDateTime.of(2025, 8, 1, 0, 0),
+                LocalDateTime.of(2025, 10, 10, 0, 0));
+        Reservation reservation = sut.createReservation(room, guest, stayPeriod);
+
+        Reservation canceledReservation = sut.cancelReservation(reservation.getId());
+
+        assertThat(canceledReservation.getReservationStatus()).isEqualTo(ReservationStatus.CANCELED);
     }
 }
