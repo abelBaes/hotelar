@@ -761,4 +761,14 @@ public class ReservationTest {
 
         assertThat(canceledReservation.getReservationStatus()).isEqualTo(ReservationStatus.CANCELED);
     }
+
+    @Test
+    @DisplayName("Should not be possible to cancel a non existent reservation")
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldNotBePossibleToCancelANonExistentReservation(){
+        assertThatThrownBy(() -> sut.cancelReservation("H-20251005223045384920"))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("Reservation not found for id: H-20251005223045384920");
+    }
 }
