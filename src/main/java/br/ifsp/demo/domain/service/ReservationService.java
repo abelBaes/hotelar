@@ -1,7 +1,7 @@
 package br.ifsp.demo.domain.service;
 
 import br.ifsp.demo.domain.model.*;
-import br.ifsp.demo.repository.ReservationRepository;
+import br.ifsp.demo.persistence.repository.ReservationRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
