@@ -3,9 +3,11 @@ package br.ifsp.demo.domain.service;
 import br.ifsp.demo.domain.model.Room;
 import br.ifsp.demo.domain.model.RoomStatus;
 import br.ifsp.demo.persistence.repository.room.RoomRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
 
+@Service
 public class RoomService {
 
     private final RoomRepository roomRepository;
