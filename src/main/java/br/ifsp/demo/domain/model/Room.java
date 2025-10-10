@@ -4,7 +4,7 @@ public class Room {
 
     private final String id;
     private RoomStatus status;
-    private final double price;
+    private double price;
 
     public Room(String id, RoomStatus status, double price) {
         this.id = id;
@@ -23,6 +23,8 @@ public class Room {
     public void setStatus(RoomStatus status) {
         this.status = status;
     }
+
+    public void setPrice(double price) { this.price = price; }
 
     public double getPrice() {
         return price;
