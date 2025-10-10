@@ -2,11 +2,13 @@ package br.ifsp.demo.domain.service;
 
 import br.ifsp.demo.domain.model.*;
 import br.ifsp.demo.persistence.repository.ReservationRepository;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+@Service
 public class ReservationService {
     
     private static final double VIP_DISCOUNT_RATE = 0.85; // 15% discount for VIP guests
