@@ -12,8 +12,8 @@ public class ReservationMapper {
         ReservationEntity entity = new ReservationEntity();
         entity.setId(domain.getId());
         entity.setRoom(RoomMapper.toEntity(domain.getRoom()));
-        entity.setGuest(GuestMapper.toEntity(domain.getGuest()));
-        entity.setStayPeriod(toEmbeddable(domain.getStayPeriod()));
+        entity.setGuest(guestEmbeddable(domain.getGuest()));
+        entity.setStayPeriod(stayPeriodEmbeddable(domain.getStayPeriod()));
         entity.setReservationStatus(domain.getReservationStatus());
         entity.setExtraServices(toEmbeddableList(domain.getExtraServices()));
         return entity;
@@ -23,21 +23,35 @@ public class ReservationMapper {
         return new Reservation(
                 entity.getId(),
                 RoomMapper.toDomain(entity.getRoom()),
-                GuestMapper.toDomain(entity.getGuest()),
-                toDomain(entity.getStayPeriod()),
+                guestDomain(entity.getGuest()),
+                stayPeriodDomain(entity.getStayPeriod()),
                 entity.getReservationStatus()
         );
     }
 
-    private static StayPeriodEmbeddable toEmbeddable(StayPeriod domain) {
+    private static StayPeriodEmbeddable stayPeriodEmbeddable(StayPeriod domain) {
         StayPeriodEmbeddable emb = new StayPeriodEmbeddable();
         emb.setCheckin(domain.getCheckin());
         emb.setCheckout(domain.getCheckout());
         return emb;
     }
 
-    private static StayPeriod toDomain(StayPeriodEmbeddable emb) {
+    private static GuestEmbeddable guestEmbeddable(Guest domain) {
+        GuestEmbeddable emb = new GuestEmbeddable();
+        emb.setCpf(domain.getCpf());
+        emb.setName(domain.getName());
+        emb.setAge(domain.getAge());
+        emb.setVip(domain.isVip());
+
+        return emb;
+    }
+
+    private static StayPeriod stayPeriodDomain(StayPeriodEmbeddable emb) {
         return new StayPeriod(emb.getCheckin(), emb.getCheckout());
+    }
+
+    private static Guest guestDomain(GuestEmbeddable emb) {
+        return new Guest(emb.getName(), emb.getAge(), emb.getCpf(), emb.isVip());
     }
 
     private static List<ExtraServiceEmbeddable> toEmbeddableList(List<ExtraService> domainList) {

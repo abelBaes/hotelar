@@ -25,9 +25,8 @@ public class ReservationEntity {
     @JoinColumn(name = "room_id")
     private RoomEntity room;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "guest_id")
-    private GuestEntity guest;
+    @Embedded
+    private GuestEmbeddable guest;
 
     @Embedded
     private StayPeriodEmbeddable stayPeriod;
