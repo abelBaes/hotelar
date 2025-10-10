@@ -1,4 +1,4 @@
-package br.ifsp.demo.repository;
+package br.ifsp.demo.persistence.repository;
 
 import br.ifsp.demo.domain.model.Reservation;
 
