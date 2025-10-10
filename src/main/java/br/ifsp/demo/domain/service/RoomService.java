@@ -2,10 +2,9 @@ package br.ifsp.demo.domain.service;
 
 import br.ifsp.demo.domain.model.Room;
 import br.ifsp.demo.domain.model.RoomStatus;
-import br.ifsp.demo.persistence.repository.RoomRepository;
+import br.ifsp.demo.persistence.repository.room.RoomRepository;
 
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 public class RoomService {
 

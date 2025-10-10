@@ -1,7 +1,6 @@
-package br.ifsp.demo.persistence.repository;
+package br.ifsp.demo.persistence.repository.room;
 
 import br.ifsp.demo.domain.model.Room;
-import br.ifsp.demo.persistence.entity.RoomEntity;
 import br.ifsp.demo.persistence.mapper.RoomMapper;
 import org.springframework.stereotype.Repository;
 

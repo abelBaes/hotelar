@@ -1,4 +1,4 @@
-package br.ifsp.demo.persistence.repository;
+package br.ifsp.demo.persistence.repository.room;
 
 import br.ifsp.demo.persistence.entity.RoomEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

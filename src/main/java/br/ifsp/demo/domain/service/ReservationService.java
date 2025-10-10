@@ -1,7 +1,7 @@
 package br.ifsp.demo.domain.service;
 
 import br.ifsp.demo.domain.model.*;
-import br.ifsp.demo.persistence.repository.ReservationRepository;
+import br.ifsp.demo.persistence.repository.reservation.ReservationRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

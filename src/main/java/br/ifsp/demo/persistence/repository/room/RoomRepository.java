@@ -1,6 +1,5 @@
-package br.ifsp.demo.persistence.repository;
+package br.ifsp.demo.persistence.repository.room;
 
-import br.ifsp.demo.domain.model.Reservation;
 import br.ifsp.demo.domain.model.Room;
 
 import java.util.List;

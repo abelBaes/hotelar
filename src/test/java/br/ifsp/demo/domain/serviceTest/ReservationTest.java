@@ -1,8 +1,8 @@
 package br.ifsp.demo.domain.serviceTest;
 
 import br.ifsp.demo.domain.model.*;
-import br.ifsp.demo.persistence.repository.FakeReservationRepository;
-import br.ifsp.demo.persistence.repository.ReservationRepository;
+import br.ifsp.demo.persistence.repository.reservation.FakeReservationRepository;
+import br.ifsp.demo.persistence.repository.reservation.ReservationRepository;
 import br.ifsp.demo.domain.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
