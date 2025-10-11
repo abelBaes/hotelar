@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/reservas")
 @CrossOrigin(origins = "*")
@@ -30,9 +32,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(
-            @Valid @RequestBody CreateReservationRequest request
-    ) {
+    public ResponseEntity<?> createReservation(@Valid @RequestBody CreateReservationRequest request) {
         try {
             var room = roomService.findRoomById(request.roomId());
             var guest = reservationDtoMapper.toGuest(request);
@@ -41,9 +41,13 @@ public class ReservationController {
             var response = reservationDtoMapper.toResponse(reservation);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Unexpected error occurred"));
         }
     }
 }
