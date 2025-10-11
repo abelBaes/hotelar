@@ -102,6 +102,12 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    public Reservation findById(String reservationId) {
+        ReservationIDService.validate(reservationId);
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("Reservation not found for id: " + reservationId));
+    }
+
     public Reservation addExtraService(String reservationId, ExtraService service){
         ReservationIDService.validate(reservationId);
         Reservation reservation = reservationRepository.findById(reservationId)
